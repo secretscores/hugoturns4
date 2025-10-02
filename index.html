@@ -217,12 +217,8 @@
         <p class="small-instruction" style="margin-top: 50px; color: var(--accent-purple);">Toca la pantalla para abrir el portal</p>
     </div>
 
-    <audio id="background-music" loop>
-        <source src="URL_MUSICA_ELECTRO_HALLOWEEN.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="entry-sound">
-        <source src="URL_SONIDO_PORTAL_SFX.mp3" type="audio/mpeg">
-    </audio>
+    
+    
 
     <div class="invitation-card" id="invitation-card-content">
         
@@ -303,5 +299,87 @@
             }
         });
     </script>
+
+<script>
+// --- Música tétrica infantil estilo videojuego (Web Audio API) ---
+let ctx, master, isPlaying = false, nodes=[];
+const BPM = 96;
+const STEP = 60/BPM;
+const SCALE = {A:220, C:261.63, D:293.66, E:329.63, F:349.23, G:392.00};
+const PROG = [ {r:'A',t:'m'}, {r:'F',t:'M'}, {r:'D',t:'m'}, {r:'E',t:'7'} ];
+
+function ensureAudio(){
+  if(!ctx){
+    ctx = new (window.AudioContext||window.webkitAudioContext)();
+    master = ctx.createGain();
+    master.gain.value = 0.6;
+    master.connect(ctx.destination);
+  }
+}
+
+function tone(freq, t, dur, type='triangle', vol=0.18){
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  o.connect(g).connect(master);
+  o.start(t); o.stop(t+dur+0.05);
+  nodes.push(o,g);
+}
+
+function chord(root, type){
+  const r = SCALE[root], m3=Math.pow(2,3/12), M3=Math.pow(2,4/12), P5=Math.pow(2,7/12), m7=Math.pow(2,10/12);
+  if(type==='m') return [r, r*m3, r*P5];
+  if(type==='M') return [r, r*M3, r*P5];
+  if(type==='7') return [r, r*M3, r*P5, r*m7];
+  return [r, r*M3, r*P5];
+}
+
+function scheduleBar(t0, idx){
+  const {r,t} = PROG[idx%PROG.length];
+  const notes = chord(r,t);
+  for(let k=0;k<4;k++) tone(notes[0]/2, t0 + k*STEP, STEP*0.45, 'sine', 0.12);
+  const arp = [notes[0],notes[1],notes[2],notes[1],notes[0]*2,notes[2],notes[1],notes[0]*2];
+  for(let j=0;j<arp.length;j++) tone(arp[j], t0 + j*(STEP/2), STEP*0.42, 'triangle', 0.15);
+  const mel = [notes[2]*1.1, notes[1]*1.2, notes[0]*2, notes[2]*1.05];
+  for(let m=0;m<mel.length;m++) tone(mel[m], t0 + m*STEP, STEP*0.6, 'sine', 0.2);
+}
+
+function startMusic(){
+  if(isPlaying) return;
+  ensureAudio();
+  ctx.resume().then(()=>{
+    isPlaying = true;
+    const now = ctx.currentTime; 
+    let t = now+0.05, bar = 0;
+    (function loop(){
+      if(!isPlaying) return;
+      while(t < ctx.currentTime+2){ scheduleBar(t, bar); t+=STEP*4; bar++; }
+      requestAnimationFrame(loop);
+    })();
+  });
+}
+
+function stopMusic(){
+  isPlaying=false;
+  nodes.forEach(n=>{try{n.stop()}catch(_){}}); nodes=[];
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const gateBtn = document.getElementById('enterBtn') || document.querySelector('.portal-icon') || document.querySelector('.enter');
+  const welcomeScreen = document.getElementById('welcome-screen');
+  if(gateBtn){
+    gateBtn.addEventListener('click', ()=>{
+      ensureAudio();
+      ctx.resume().then(()=>{
+        stopMusic(); startMusic();
+        if(welcomeScreen){ welcomeScreen.style.opacity = '0'; setTimeout(()=>{ welcomeScreen.style.display='none'; }, 500); }
+      });
+    });
+  }
+});
+</script>
+
 </body>
 </html>
