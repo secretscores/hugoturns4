@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>🎃 Happy Halloween Birthday 🧟</title>
+  <title>🎃Happy Halloween Birthday🧟</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Creepster&display=swap" rel="stylesheet">
   <style>
     :root{
@@ -27,14 +27,28 @@
       text-shadow:0 0 8px rgba(255,140,0,.7), 0 0 15px rgba(255,140,0,.5), 0 0 25px rgba(255,140,0,.3);
       margin-bottom:20px; animation:flicker 1s infinite alternate; line-height:1.1;
     }
-    .portal-icon{ font-size:4em; color:var(--accent-purple); animation:pulse-icon 1.5s infinite alternate; }
+    /* Imagen de bienvenida */
+    .portal-img{
+      max-width:280px;
+      width:80%;
+      height:auto;
+      margin:15px auto;
+      display:block;
+      filter:drop-shadow(0 0 20px rgba(255,140,0,.6));
+    }
+
+    /* Tarjeta: ahora con imagen de fondo + filtro sombrío */
     .invitation-card{
       width:90%; max-width:380px; min-height:600px;
-      background:linear-gradient(145deg, rgba(16,0,29,.96) 0%, rgba(24,0,38,.92) 100%);
+      background: linear-gradient(145deg, rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('background1.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       border-radius:30px; box-shadow:0 15px 50px rgba(0,0,0,.7), 0 0 25px var(--accent-purple);
       padding:30px 20px; box-sizing:border-box; text-align:center; position:relative; z-index:50;
       opacity:0; transform:scale(.8) rotateY(-15deg); transition:opacity 1s ease-out, transform 1s ease-out;
     }
+
     h1{
       font-family:var(--font-title); font-size:3.5em; color:var(--accent-orange);
       text-shadow:0 0 10px var(--accent-orange), 0 0 20px rgba(255,140,0,.5);
@@ -43,6 +57,7 @@
     @keyframes title-pop{0%{opacity:0;transform:scale(.5)}100%{opacity:1;transform:scale(1)}}
     h2{ font-size:1.2em; font-weight:700; color:var(--accent-purple); margin:10px 0 25px; text-transform:uppercase; letter-spacing:2px; }
     p{ font-size:1em; margin:15px 0; line-height:1.5; color:var(--text-color); }
+
     .data-panel{
       background-color:rgba(0,0,0,.23); border:1px solid var(--accent-purple); border-radius:10px;
       padding:20px 10px; margin:30px 0; box-shadow:0 0 15px rgba(157,60,255,.25); text-align:left;
@@ -51,12 +66,14 @@
       border-bottom:1px dashed rgba(255,255,255,.1); font-weight:700; }
     .data-panel p:last-child{ border-bottom:none; }
     .data-panel span{ font-weight:900; color:var(--accent-orange); text-shadow:0 0 5px rgba(255,140,0,.5); }
+
     .location-button{
       display:block; margin:30px auto; padding:18px 30px; background:var(--accent-purple); color:#fff; text-decoration:none;
       font-weight:900; border-radius:50px; box-shadow:0 0 20px var(--accent-purple); text-transform:uppercase; letter-spacing:1px;
       transition:all .3s ease; position:relative; overflow:hidden; border:none;
     }
     .location-button:hover{ background:var(--accent-orange); color:#fff; box-shadow:0 0 25px var(--accent-orange); transform:scale(1.05); }
+
     .effect-item{
       position:absolute; font-size:3em; opacity:.5; pointer-events:none; animation:float-and-sway 15s linear infinite;
       filter:drop-shadow(0 0 5px rgba(255,255,255,.5)); z-index:9999;
@@ -65,6 +82,8 @@
     .effect-item:nth-child(2){ top:25%; right:10%; animation-duration:11s; animation-delay:3s; color:var(--accent-purple); }
     .effect-item:nth-child(3){ bottom:6%; left:20%; animation-duration:12s; animation-delay:3s; color:var(--text-color); }
     .effect-item:nth-child(4){ bottom:38%; left:26%; animation-duration:13s; animation-delay:3s; color:var(--text-color); transform:rotate(-15deg); }
+
+    /* Animaciones */
     @keyframes float-and-sway{
       0%{transform:translate(0,0) rotate(0deg); opacity:0}
       20%{opacity:.7}
@@ -78,22 +97,33 @@
     }
     @keyframes pulse-icon{0%{transform:scale(1)}100%{transform:scale(1.1)}}
     .show-card{ opacity:1 !important; transform:scale(1) rotateY(0deg) !important; }
+
+    /* Tamaño de las PNG dentro de los spans de efecto */
+    .effect-item img{
+      width: 1.8em;   /* ~3em reales porque el span usa font-size:3em */
+      height: 1.8em;
+      display: block;
+      object-fit: contain;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
   <div id="welcome-screen">
     <h1 class="portal-text">HUGO TURNS 4!</h1>
-    <p>¿Están listos?...</p>
-    <div class="portal-icon">🎃</div>
-    <p class="small-instruction" style="margin-top:50px; color:var(--accent-purple);">Toca la pantalla para abrir el portal</p>
+<!--    <p>¿Están listos?...</p> -->
+    <!-- Imagen de bienvenida -->
+    <img src="happyhw1.png" alt="Happy Halloween" class="portal-img">
+    <p class="small-instruction" style="margin-top:50px; color:var(--accent-purple);">Toca la pantalla...</p>
   </div>
 
   <!-- Tarjeta -->
   <div class="invitation-card" id="invitation-card-content">
-    <span class="effect-item">🦇</span>
-    <span class="effect-item">🎃</span>
-    <span class="effect-item">🧟</span>
-    <span class="effect-item">👻</span>
+    <!-- Íconos flotantes en PNG -->
+    <span class="effect-item"><img src="iconpic4.png" alt=""></span>
+    <span class="effect-item"><img src="iconpic2.png" alt=""></span>
+    <span class="effect-item"><img src="iconpic3.png" alt=""></span>
+    <span class="effect-item"><img src="iconpic1.png" alt=""></span>
 
     <h1 class="portal-text">HUGO TURNS 4!</h1>
     <h2>Happy Halloween Birthday</h2>
@@ -141,28 +171,21 @@
     /* ---------- Parámetros musicales ---------- */
     const BPM = 132;               // vals vivo (3/4)
     const BEAT = 60 / BPM;         // negra
-    const STEP = BEAT / 2;         // corchea (programación fina)
+    const STEP = BEAT / 2;         // corchea
     const ROOT = 61;               // C#3
-    const SCALE = [0,2,3,5,7,8,10]; // menor natural con ♭6 vibe Halloween
+    const SCALE = [0,2,3,5,7,8,10];
     const GLIDE = 0.045;
 
-    // Envolventes
     const BASS_ENV  = {a:0.008,d:0.10,s:0.6,r:0.18};
     const LEAD_ENV  = {a:0.015,d:0.11,s:0.55,r:0.25};
     const GLOCK_ENV = {a:0.001,d:0.10,s:0.0,r:0.9};
 
-    // Bajo "oom-pah-pah" (3/4) + colores ♭VI / v (6 compases)
     const bassRootDeg = [0,0,0, 0,0,0];
     const chordDegrees = [
-      [0,3,7],
-      [5,8,12],
-      [7,10,14],
-      [0,3,7],
-      [8,10,15],
-      [7,10,14]
+      [0,3,7],[5,8,12],[7,10,14],
+      [0,3,7],[8,10,15],[7,10,14]
     ];
 
-    // Melodía original (no copia), 16 1/16 por compás × 6 compases
     const melody16ths = [
       0, 2, 3, 5,  3, 2, 0, -1,  0, 2, 5, 7,  5, 3, 2, 0,
       0, 2, 3, 5,  8, 7, 5, 3,   2, 3, 5, 7,  8, 7, 5, 3,
@@ -172,7 +195,6 @@
       0, 2, 3, 5,  3, 2, 0, -1,  0, 2, 5, 7,  5, 3, 2, 0
     ];
 
-    /* ---------- Utils ---------- */
     const mtof = m => 440 * Math.pow(2, (m-69)/12);
     const gain = v => { const g = ctx.createGain(); g.gain.value = v ?? 0; return g; };
     const env  = (node, t0, e, peak=1, sus=0.6) => {
@@ -182,15 +204,12 @@
       node.gain.linearRampToValueAtTime(peak*sus, t0 + e.a + e.d);
     };
 
-    /* ---------- Audio graph ---------- */
     function init(){
       if (ctx) return;
       ctx = new (window.AudioContext || window.webkitAudioContext)();
-
       master = gain(0.85);
       bus    = gain(0.9);
 
-      // Ping-pong retro + filtro suave
       delayA = ctx.createDelay(0.8); delayA.delayTime.value = 0.28;
       delayB = ctx.createDelay(0.8); delayB.delayTime.value = 0.37;
       const fbA = gain(0.28), fbB = gain(0.25);
@@ -208,7 +227,6 @@
       master.connect(limiter).connect(ctx.destination);
     }
 
-    /* ---------- Instrumentos ---------- */
     function playBass(time, midi, vol=0.36){
       const osc = ctx.createOscillator(); osc.type='triangle';
       const g  = gain(0); const p = new StereoPannerNode(ctx,{pan:-0.05});
@@ -272,7 +290,6 @@
       o.start(time); o.stop(time + dur + 0.1);
     }
 
-    /* ---------- Secuenciador (6 compases en bucle) ---------- */
     function startSeq(){
       if (running) return; running = true;
       let next = ctx.currentTime + 0.06;
@@ -281,21 +298,18 @@
       function loop(){
         while (next < ctx.currentTime + horizon){
           const sixBarLen = 6;
-          const bar = Math.floor((step * STEP) / (BEAT*3)) % sixBarLen; // 3/4
-          const posInBar = ((step * STEP) % (BEAT*3)) / BEAT;           // en negras
+          const bar = Math.floor((step * STEP) / (BEAT*3)) % sixBarLen;
+          const posInBar = ((step * STEP) % (BEAT*3)) / BEAT;
 
-          // 1: bajo
           if (Math.abs(posInBar - 0) < 0.001){
             const deg = bassRootDeg[bar];
             const rootMidi = ROOT + SCALE[(deg % SCALE.length + SCALE.length) % SCALE.length];
             playBass(next, rootMidi);
           }
-          // 2 y 3: stabs de acorde
           if (Math.abs(posInBar - 1) < 0.001 || Math.abs(posInBar - 2) < 0.001){
             const chord = chordDegrees[bar].map(d => ROOT + d);
             playChordStab(next, chord);
           }
-          // Glockenspiel (motivo)
           if (step % 2 === 0){
             const idx = (bar*16) + ((step/2)%16|0);
             const degOff = melody16ths[idx % melody16ths.length];
@@ -303,7 +317,6 @@
             const midi = (ROOT + 12) + SCALE[scaleIdx];
             playGlock(next, midi);
           }
-          // Lead a contratiempo
           if ([0.5, 1.5, 2.5].some(v => Math.abs(posInBar - v) < 0.001)){
             const idx = (bar*16) + ((step)%16);
             const degOff = melody16ths[idx % melody16ths.length] + (bar===4 ? 2 : 0);
@@ -311,7 +324,6 @@
             const midi = (ROOT + 12) + SCALE[scaleIdx];
             playLead(next, midi);
           }
-          // Theremin en compás 3 y 6
           if (Math.abs(posInBar - 0) < 0.001 && (bar === 2 || bar === 5)){
             playTheremin(next + 0.05, ROOT+SCALE[0]+12, ROOT+SCALE[3]+19, 1.6, 0.14);
           }
@@ -323,7 +335,6 @@
       }
       loop();
 
-      // FX tipo “music box” cada ~9–14 s
       const fxLoop = () => {
         const t = ctx.currentTime + 0.2;
         [0,3,7,12].forEach((d,i)=>{ playGlock(t + i*0.12, ROOT + d + 24, 0.18); });
@@ -339,21 +350,17 @@
       step = 0;
     }
 
-    /* ---------- UI / Inicio ---------- */
     welcomeScreen.addEventListener('click', async ()=>{
-      // Transición visual original
       welcomeScreen.style.opacity = '0';
       invitationCardContent.classList.add('show-card');
       setTimeout(()=>welcomeScreen.style.display='none', 500);
 
-      // Audio
       if (!ctx) init();
       try{ await ctx.resume(); }catch(e){}
       startSeq();
       portalHit();
     }, { passive:true });
 
-    // Impacto breve al abrir (igual que en tu versión)
     function portalHit(){
       const t = ctx.currentTime + 0.02;
       const o = ctx.createOscillator(); o.type='square';
@@ -363,18 +370,16 @@
       o.connect(bp).connect(a).connect(bus); o.start(t); o.stop(t+0.36);
     }
 
-    // Ahorro de batería
     document.addEventListener('visibilitychange', ()=>{
       if (!ctx) return;
       if (document.hidden){ stopSeq(); }
       else if (!running){ startSeq(); }
     });
 
-    // Controles por consola (opcionales)
     window.__toy_spooky = {
-      tempo(bpm){ stopSeq(); const beat = 60/bpm; /* re-usa BPM dinámicamente */ startSeq(); },
-      dark(hz){ darkLP && darkLP.frequency.setTargetAtTime(hz, ctx.currentTime, .3); }, // 3k–7k
-      wet(v){ bus && bus.gain.setTargetAtTime(v, ctx.currentTime, .2); },               // 0..1
+      tempo(bpm){ stopSeq(); const beat = 60/bpm; startSeq(); },
+      dark(hz){ darkLP && darkLP.frequency.setTargetAtTime(hz, ctx.currentTime, .3); },
+      wet(v){ bus && bus.gain.setTargetAtTime(v, ctx.currentTime, .2); },
       master(v){ master && (master.gain.value=v); }
     };
   })();
