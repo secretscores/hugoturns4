@@ -103,7 +103,7 @@
       <p>FECHA: <span>🎃 30 DE OCTUBRE</span></p>
       <p>HORA: <span>🕰️ 04:00 PM</span></p>
       <p>TIP: <span>👻 Trae tu Disfraz</span></p>
-      <p>LUGAR: <span>🗺️ Privada Los Reyes</span></p>
+      <p>LUGAR: <span>🗺️ Privada Los Reyes,<br>Portal de Hierro</span></p>
     </div>
 
     <a id="map-link" href="#" class="location-button" target="_blank">UBICACIÓN</a>
@@ -112,12 +112,11 @@
 
   <script>
     /* =========================
-       CONFIG EVENTO & MAP LINK
+       CONFIG MAPA
        ========================= */
     const LATITUD = 25.757046;
     const LONGITUD = -109.023735;
     const LUGAR_FIESTA = "Fiesta de Hugo";
-
     function createMapLink(lat, lng, label){
       const isApple = /iPhone|iPad|iPod/i.test(navigator.userAgent);
       return isApple
@@ -128,194 +127,206 @@
     mapLink.href = createMapLink(LATITUD, LONGITUD, LUGAR_FIESTA);
 
     /* =========================
-       WEB AUDIO: SINTETIZADOR 80s
+       WEB AUDIO: NEÓN + PASOS
        ========================= */
-    let ctx, master, delay, delayFeedback, filter, limiter;
+    let ctx, master, limiter;
+    let neonGate, neonHumGain, crackleTimer, gateTimer, stepsTimer;
     let running = false;
 
-    // Ajustes de "tema"
-    const BPM = 92;                  // tempo ochentero
-    const SCALE = [0,2,3,5,7,10];    // dórico/menor (intervalos)
-    const ROOT = 58;                 // A#2 (nota base para bajo)
-    const LEAD_ROOT = 70;            // A#4 para lead
+    // ⬇️ Ajustes rápidos
+    const HUM_BASE = 60;          // 60 Hz (zumbido eléctrico)
+    const HUM_LEVEL = 0.14;       // volumen base del zumbido
+    const GATE_MIN = 0.25;        // ganancia mínima del parpadeo (neón)
+    const GATE_MAX = 0.95;        // ganancia máxima del parpadeo
+    const GATE_RATE_MS = [25, 45]; // intervalo aleatorio entre cambios (ms) => parpadeo rápido
+    const CRACKLE_EVERY_MS = [120, 420]; // aleatorio entre chispazos
+    const CRACKLE_DUR = [0.012, 0.045];  // duración de chispazos (12–45 ms)
+    const CRACKLE_HP = 2800;      // filtro paso alto para chispa
 
-    // ADSR
-    const ADSR = { a:0.01, d:0.12, s:0.6, r:0.2 };
-    const LEAD_ADSR = { a:0.005, d:0.08, s:0.5, r:0.15 };
+    // Pasos:
+    const STEPS_TRIGGER_EVERY = 2000; // disparar patrón cada 2 s
+    const STEPS_PATTERN_DUR = 3.0;    // el patrón dura 3 s
+    const STEP_SPACING = 0.6;         // separación entre pisadas
+    const STEP_COUNT = Math.floor(STEPS_PATTERN_DUR / STEP_SPACING); // nº pisadas en patrón
 
-    // Paso en segundos (16th)
-    const stepDur = 60 / (BPM * 4);
-
-    // Patrones
-    const bassPattern = [0,0,7,7, 5,5,3,3, 0,0,7,7, 5,3,2,2]; // grados
-    const leadPattern = [0,2,3,5, 7,5,3,2, 0,3,5,7, 10,7,5,3]; // spooky arpeggio
-
-    function midiToFreq(m){ return 440 * Math.pow(2, (m-69)/12); }
-
-    function envGain(t0, a,d,s,r, peak=1, sus=0.7){
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0, t0);
-      g.gain.linearRampToValueAtTime(peak, t0 + a);
-      g.gain.linearRampToValueAtTime(sus, t0 + a + d);
-      // el release se programa fuera
-      return g;
-    }
-
-    function scheduleOsc({time, midi, type='square', cutoff=1400, adsr=ADSR, vol=0.6, pan=0}){
-      const osc = ctx.createOscillator();
-      const amp = envGain(time, adsr.a, adsr.d, adsr.s, adsr.r, 1, 0.7);
-      const panner = new StereoPannerNode(ctx, { pan });
-
-      osc.type = type;
-      osc.frequency.setValueAtTime(midiToFreq(midi), time);
-
-      // Filtro suave para color 80s
-      const vcf = ctx.createBiquadFilter();
-      vcf.type = 'lowpass';
-      vcf.frequency.setValueAtTime(cutoff, time);
-      vcf.Q.value = 0.8;
-
-      // Cadena: osc -> amp -> vcf -> delay -> master
-      osc.connect(amp).connect(vcf).connect(delay).connect(master);
-      vcf.connect(panner).connect(delay); // un toque estéreo antes del delay
-
-      // Volumen por nota
-      amp.gain.setValueAtTime(0, time);
-      amp.gain.linearRampToValueAtTime(vol, time + adsr.a);
-      amp.gain.linearRampToValueAtTime(vol*adsr.s, time + adsr.a + adsr.d);
-
-      osc.start(time);
-      // Release
-      amp.gain.setTargetAtTime(0.0001, time + stepDur*0.95, adsr.r);
-      osc.stop(time + stepDur + adsr.r + 0.05);
-    }
+    function rand(min, max){ return Math.random()*(max-min)+min; }
+    function choice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
     function initAudio(){
       if (ctx) return;
       ctx = new (window.AudioContext || window.webkitAudioContext)();
 
+      // Master
       master = ctx.createGain();
-      master.gain.setValueAtTime(0.35, ctx.currentTime);
+      master.gain.setValueAtTime(0.8, ctx.currentTime);
 
-      // Pequeño limitador (soft)
       limiter = ctx.createDynamicsCompressor();
-      limiter.threshold.value = -10;
-      limiter.knee.value = 18;
-      limiter.ratio.value = 8;
+      limiter.threshold.value = -14;
+      limiter.knee.value = 20;
+      limiter.ratio.value = 12;
       limiter.attack.value = 0.003;
       limiter.release.value = 0.15;
 
-      delay = ctx.createDelay(0.6);
-      delay.delayTime.setValueAtTime(0.28, ctx.currentTime); // eco rapidito ochentero
+      master.connect(limiter).connect(ctx.destination);
 
-      delayFeedback = ctx.createGain();
-      delayFeedback.gain.setValueAtTime(0.32, ctx.currentTime); // feedback moderado
-      delay.connect(delayFeedback).connect(delay);
+      // Puerta/compresor para simular parpadeo global (control de neon)
+      neonGate = ctx.createGain();
+      neonGate.gain.value = 0.0;
+      neonGate.connect(master);
 
-      // Filtro global muy leve para redondear
-      filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(9000, ctx.currentTime);
+      // Zumbido base (armónicos 60/120/180 Hz)
+      neonHumGain = ctx.createGain();
+      neonHumGain.gain.value = HUM_LEVEL;
+      neonHumGain.connect(neonGate);
 
-      // Cadena master
-      delay.connect(filter).connect(limiter).connect(ctx.destination);
-      master.connect(delay);
+      [1,2,3].forEach(mult=>{
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        gain.gain.value = 0.22 / mult; // armónicos decrecientes
+        osc.type = (mult === 1) ? 'sawtooth' : 'square';
+        osc.frequency.value = HUM_BASE * mult;
+        // Ligerísima inestabilidad de frecuencia (jitter)
+        setInterval(()=>{
+          const now = ctx.currentTime;
+          osc.frequency.linearRampToValueAtTime(HUM_BASE*mult*(1+rand(-0.002,0.002)), now + 0.08);
+        }, 120);
+        osc.connect(gain).connect(neonHumGain);
+        osc.start();
+      });
+
+      startNeonFlicker();
+      startCrackles();
+      startStepsLoop();
     }
 
-    // Secuenciador básico
-    let step = 0;
-    let schedulerId = null;
+    // ---------- PARPADEO (gate) ----------
+    function startNeonFlicker(){
+      if (gateTimer) return;
+      const apply = ()=>{
+        const g = rand(GATE_MIN, GATE_MAX);
+        const t = ctx.currentTime;
+        neonGate.gain.cancelScheduledValues(t);
+        neonGate.gain.setTargetAtTime(g, t, 0.015);
+        const next = rand(GATE_RATE_MS[0], GATE_RATE_MS[1]);
+        gateTimer = setTimeout(apply, next);
+      };
+      apply();
+    }
+    function stopNeonFlicker(){ if (gateTimer){ clearTimeout(gateTimer); gateTimer=null; } }
 
-    function startSequence(){
+    // ---------- CHISPAZOS ----------
+    function noiseBuffer(){
+      const len = Math.floor(ctx.sampleRate * 0.1);
+      const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i=0; i<len; i++){ data[i] = (Math.random()*2-1) * (1 - i/len); } // pequeña caída
+      return buf;
+    }
+    const _noiseBufCache = { buf:null };
+    function crackle(){
+      if (!_noiseBufCache.buf) _noiseBufCache.buf = noiseBuffer();
+      const src = ctx.createBufferSource();
+      src.buffer = _noiseBufCache.buf;
+      const hp = ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = CRACKLE_HP;
+      hp.Q.value = 0.7;
+
+      const g = ctx.createGain();
+      const now = ctx.currentTime;
+      const dur = rand(CRACKLE_DUR[0], CRACKLE_DUR[1]);
+
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(rand(0.2,0.55), now + 0.002);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+      src.connect(hp).connect(g).connect(neonGate);
+      src.start(now);
+      src.stop(now + dur + 0.02);
+    }
+    function startCrackles(){
+      if (crackleTimer) return;
+      const loop = ()=>{
+        crackle();
+        const next = rand(CRACKLE_EVERY_MS[0], CRACKLE_EVERY_MS[1]);
+        crackleTimer = setTimeout(loop, next);
+      };
+      loop();
+    }
+    function stopCrackles(){ if (crackleTimer){ clearTimeout(crackleTimer); crackleTimer=null; } }
+
+    // ---------- PASOS ----------
+    function playStep(atTime, panVal=0){
+      // Golpe grave (talón)
+      const kickOsc = ctx.createOscillator();
+      kickOsc.type = 'sine';
+      kickOsc.frequency.setValueAtTime(120, atTime);
+      kickOsc.frequency.exponentialRampToValueAtTime(55, atTime + 0.12);
+
+      const kickGain = ctx.createGain();
+      kickGain.gain.setValueAtTime(0.0001, atTime);
+      kickGain.gain.exponentialRampToValueAtTime(0.85, atTime + 0.01);
+      kickGain.gain.exponentialRampToValueAtTime(0.0001, atTime + 0.22);
+
+      // Frota/ropa (ruido filtrado)
+      if (!_noiseBufCache.buf) _noiseBufCache.buf = noiseBuffer();
+      const src = ctx.createBufferSource();
+      src.buffer = _noiseBufCache.buf;
+
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 2200;
+      bp.Q.value = 2.5;
+
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.0001, atTime);
+      noiseGain.gain.linearRampToValueAtTime(0.25, atTime + 0.02);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, atTime + 0.15);
+
+      const pan = new StereoPannerNode(ctx, { pan: panVal });
+
+      kickOsc.connect(kickGain).connect(pan).connect(master);
+      src.connect(bp).connect(noiseGain).connect(pan).connect(master);
+
+      kickOsc.start(atTime);
+      kickOsc.stop(atTime + 0.25);
+
+      src.start(atTime);
+      src.stop(atTime + 0.2);
+    }
+
+    function scheduleFootsteps(startAt, durSec){
+      // Alterna izquierda/derecha, ligeras variaciones
+      for (let i=0; i<STEP_COUNT; i++){
+        const t = startAt + i*STEP_SPACING + rand(-0.03, 0.03);
+        const pan = (i % 2 === 0) ? -0.18 : 0.18;
+        playStep(t, pan + rand(-0.05, 0.05));
+      }
+    }
+
+    function startStepsLoop(){
+      if (stepsTimer) return;
+      const tick = ()=>{
+        const t0 = ctx.currentTime + 0.05;
+        scheduleFootsteps(t0, STEPS_PATTERN_DUR);
+        stepsTimer = setTimeout(tick, STEPS_TRIGGER_EVERY);
+      };
+      tick();
+    }
+    function stopStepsLoop(){ if (stepsTimer){ clearTimeout(stepsTimer); stepsTimer=null; } }
+
+    // ---------- CONTROL ----------
+    function startSoundscape(){
       if (running) return;
       running = true;
-      const lookAhead = 0.1;    // s
-      const scheduleHorizon = 0.25; // s
-      let nextNoteTime = ctx.currentTime + 0.05;
-
-      function scheduler(){
-        while (nextNoteTime < ctx.currentTime + scheduleHorizon){
-          const s = step % 16;
-
-          // BASS
-          const bassDegree = bassPattern[s];
-          const bassMidi = ROOT + SCALE[bassDegree % SCALE.length];
-          scheduleOsc({
-            time: nextNoteTime,
-            midi: bassMidi,
-            type: 'triangle',
-            cutoff: 900,
-            adsr: {a:0.005, d:0.08, s:0.7, r:0.08},
-            vol: 0.45,
-            pan: -0.05
-          });
-
-          // LEAD (en offbeats para sensación inquietante)
-          if (s % 2 === 1){
-            const leadDegree = leadPattern[s];
-            const leadMidi = LEAD_ROOT + SCALE[leadDegree % SCALE.length];
-            scheduleOsc({
-              time: nextNoteTime,
-              midi: leadMidi,
-              type: 'square',
-              cutoff: 1600,
-              adsr: LEAD_ADSR,
-              vol: 0.30,
-              pan: 0.08
-            });
-          }
-
-          // "campanilla" fantasmita en 4 y 12
-          if (s === 4 || s === 12){
-            scheduleOsc({
-              time: nextNoteTime + stepDur*0.02,
-              midi: LEAD_ROOT + 12, // una octava arriba
-              type: 'sine',
-              cutoff: 4000,
-              adsr: {a:0.003, d:0.06, s:0.3, r:0.12},
-              vol: 0.22,
-              pan: 0.15
-            });
-          }
-
-          nextNoteTime += stepDur; // avanzar un 16th
-          step++;
-        }
-        schedulerId = setTimeout(scheduler, lookAhead*1000);
-      }
-      scheduler();
+      initAudio();
     }
-
-    function stopSequence(){
+    function stopSoundscape(){
       running = false;
-      if (schedulerId){ clearTimeout(schedulerId); schedulerId = null; }
+      stopNeonFlicker(); stopCrackles(); stopStepsLoop();
     }
 
-    // "Golpe" de entrada (impacto corto sintetizado)
-    function playPortalHit(){
-      const t0 = ctx.currentTime + 0.02;
-      const osc = ctx.createOscillator();
-      const amp = ctx.createGain();
-      const vcf = ctx.createBiquadFilter();
-      vcf.type = 'bandpass';
-      vcf.frequency.setValueAtTime(600, t0);
-
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(180, t0);
-      osc.frequency.exponentialRampToValueAtTime(60, t0 + 0.35);
-
-      amp.gain.setValueAtTime(0, t0);
-      amp.gain.linearRampToValueAtTime(0.9, t0 + 0.01);
-      amp.gain.exponentialRampToValueAtTime(0.001, t0 + 0.4);
-
-      osc.connect(vcf).connect(amp).connect(delay).connect(master);
-      osc.start(t0);
-      osc.stop(t0 + 0.45);
-    }
-
-    /* =========================
-       INTERACCIÓN UI
-       ========================= */
+    // ---------- UI ----------
     const welcomeScreen = document.getElementById('welcome-screen');
     const invitationCardContent = document.getElementById('invitation-card-content');
 
@@ -326,29 +337,47 @@
       setTimeout(()=>welcomeScreen.style.display='none', 500);
 
       // Audio
-      initAudio();
+      if (!ctx) initAudio();
       try{ await ctx.resume(); }catch(e){}
+      startSoundscape();
+      // Impacto breve al abrir
       playPortalHit();
-      setTimeout(()=> startSequence(), 700);
     });
 
-    // Seguridad: detener al cambiar de pestaña para ahorrar batería
+    // Impacto de apertura (breve)
+    function playPortalHit(){
+      const t0 = ctx.currentTime + 0.02;
+      const osc = ctx.createOscillator();
+      const amp = ctx.createGain();
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.setValueAtTime(700, t0);
+      bp.Q.value = 3;
+
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(240, t0);
+      osc.frequency.exponentialRampToValueAtTime(70, t0 + 0.28);
+
+      amp.gain.setValueAtTime(0, t0);
+      amp.gain.linearRampToValueAtTime(0.8, t0 + 0.02);
+      amp.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.35);
+
+      osc.connect(bp).connect(amp).connect(master);
+      osc.start(t0);
+      osc.stop(t0 + 0.38);
+    }
+
+    // Ahorro de batería / foco
     document.addEventListener('visibilitychange', ()=>{
       if (!ctx) return;
-      if (document.hidden){ stopSequence(); }
-      else if (!running){ startSequence(); }
+      if (document.hidden){ stopSoundscape(); }
+      else if (!running){ startSoundscape(); }
     });
 
-    // Exponer ajustes rápidos en consola si lo necesitas:
-    window.__halloweenAudio = {
-      setTempo:(bpm)=>{ /* cambia en vivo próximo compás */
-        // Nota: para un cambio limpio, podrías parar y re-arrancar:
-        stopSequence();
-        const newStepDur = 60/(bpm*4);
-        // reasignar stepDur "dinámicamente" recreando la secuencia:
-        Object.defineProperty(window, 'stepDur', { value:newStepDur, writable:false, configurable:true });
-        startSequence();
-      }
+    // Exponer knobs rápidos en consola
+    window.__neon = {
+      setHumLevel:(v)=>{ if (neonHumGain) neonHumGain.gain.setTargetAtTime(v, ctx.currentTime, 0.05); },
+      setGate:(min,max)=>{ window.GATE_MIN=min; window.GATE_MAX=max; }, // visual; cambia alcance del parpadeo
     };
   </script>
 </body>
