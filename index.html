@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Invitación Halloween — Hugo 4</title>
+<meta name="theme-color" content="#2a0e3b" />
+<style>
+  :root{
+    --bg1:#160a22;
+    --bg2:#2b0b3b;
+    --glow:#ffb84d;
+    --accent:#ff8a00;
+    --violet:#a76bff;
+    --text:#fff;
+    --radius: 22px;
+    --shadow: 0 20px 60px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:radial-gradient(120% 120% at 50% -10%, #4a1a83 0%, #250c3d 50%, #0c0714 100%);color:var(--text);font-family:system-ui, Segoe UI, Roboto, 'Helvetica Neue', Arial}
+  .phone{width:min(430px,100vw);min-height:100svh;margin:0 auto;padding:16px 12px 22px;display:flex;flex-direction:column;gap:12px}
+  .frame{position:relative;border-radius:calc(var(--radius) + 12px);padding:10px;background:linear-gradient(180deg,#1a0b25,#0f0717);box-shadow:inset 0 0 0 2px rgba(255,255,255,.06),var(--shadow)}
+  .frame::before{content:"";position:absolute;inset:-10px;border-radius:calc(var(--radius) + 20px);background:linear-gradient(145deg,rgba(167,107,255,.7),rgba(255,138,0,.6));filter:blur(16px);opacity:.55;z-index:-1}
+  .card{position:relative;border-radius:var(--radius);padding:16px;background:radial-gradient(120% 80% at 50% -10%,#5b1ca3 0%,#2a0f45 60%,#12041f 100%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.06),inset 0 0 60px rgba(167,107,255,.18);overflow:hidden;display:flex;flex-direction:column;gap:12px}
+  .card::before{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 3px rgba(255,184,77,.35),inset 0 0 45px rgba(255,184,77,.18),inset 0 0 90px rgba(167,107,255,.16);pointer-events:none}
+  header.title{text-align:center;margin:0;line-height:1.05}
+  .h1{font-size:clamp(30px,7vw,40px);color:var(--glow);text-shadow:0 3px 0 rgba(0,0,0,.35),0 0 14px rgba(255,184,77,.5),0 0 40px rgba(255,138,0,.35);font-weight:900}
+  .h2{font-size:clamp(14px,4vw,18px);color:#ffdca1;margin-top:4px}
+  .sky{position:relative;height:56px}
+  .bat{position:absolute;width:48px;aspect-ratio:2/1;background:radial-gradient(90% 120% at 50% 40%,#000 0%,#2c2436 70%);clip-path:polygon(0% 50%,15% 40%,25% 60%,35% 40%,45% 60%,55% 40%,65% 60%,75% 40%,85% 60%,100% 50%,100% 70%,0% 70%);opacity:.85;filter:drop-shadow(0 6px 6px rgba(0,0,0,.6));animation:flutter 4s ease-in-out infinite}
+  @keyframes flutter{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(2deg)}}
+  .b1{top:6px;left:10%}.b2{top:14px;right:12%;transform:scale(1.1)}.b3{top:22px;left:70%;transform:scale(.9)}
+  .info{display:grid;gap:8px;grid-template-columns:1fr 1fr}
+  .badge{background:linear-gradient(180deg,rgba(255,184,77,.18),rgba(255,184,77,.06));border:1px solid rgba(255,184,77,.35);padding:10px 12px;border-radius:12px;text-align:center;font-weight:700;min-height:40px;display:flex;align-items:center;justify-content:center}
+  .badge b{color:var(--glow)}.place{grid-column:1/-1}
+  .characters{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .char{width:100%;aspect-ratio:3/4;border-radius:12px;background:radial-gradient(120% 120% at 50% 30%,#2c1348 0%,#130a22 60%,#0a0715 100%);box-shadow:0 8px 20px rgba(0,0,0,.55),inset 0 0 0 2px rgba(255,255,255,.06);overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .char img{width:100%;height:100%;object-fit:contain;display:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6))}
+  .char .ph{font-size:28px;opacity:.7}
+  .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .btn{appearance:none;border:0;cursor:pointer;border-radius:12px;padding:12px 14px;font-weight:800;letter-spacing:.4px;color:#0c0715;background:linear-gradient(180deg,#ffdca1,#ffb84d);box-shadow:0 8px 18px rgba(255,184,77,.25),inset 0 1px 0 rgba(255,255,255,.5)}
+  .btn.secondary{color:#fff;background:linear-gradient(180deg,#7b4dff,#5517d0);box-shadow:0 8px 18px rgba(167,107,255,.25),inset 0 1px 0 rgba(255,255,255,.2)}
+  .plate{padding:10px 12px;border-radius:12px;text-align:center;background:linear-gradient(180deg,rgba(255,184,77,.15),rgba(255,184,77,.05));border:1px solid rgba(255,184,77,.35);box-shadow:inset 0 0 24px rgba(255,184,77,.25)}
+  .muter{position:fixed;right:14px;bottom:14px;z-index:5}.muter .btn{padding:8px 10px;font-size:12px}
+  .gate{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:radial-gradient(100% 100% at 50% 30%,rgba(25,7,40,.96) 0%,rgba(10,4,18,.98) 60%,rgba(3,2,6,1) 100%);z-index:10;transition:opacity .5s}
+  .gate.hidden{opacity:0;pointer-events:none}
+  .enter{font-size:18px;padding:14px 18px;border-radius:12px;font-weight:900;background:linear-gradient(180deg,#ffdca1,#ffb84d);color:#12041f;box-shadow:0 10px 24px rgba(255,184,77,.3)}
+  .shake{animation:shake .45s ease both}
+  @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}100%{transform:translateX(0)}}
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="frame">
+      <div class="card" id="card">
+        <header class="title">
+          <div class="h1">HUGO TURNS 4!</div>
+          <div class="h2">Happy Halloween Birthday!</div>
+        </header>
+
+        <div class="sky"><div class="bat b1"></div><div class="bat b2"></div><div class="bat b3"></div></div>
+
+        <section class="info">
+          <div class="badge"><b>Día:</b>&nbsp;30 de Octubre</div>
+          <div class="badge"><b>Hora:</b>&nbsp;04:00 PM</div>
+          <div class="badge place"><b>Lugar:</b>&nbsp;Portal de Hierro, Privada Los Reyes</div>
+        </section>
+
+        <section class="characters">
+          <div class="char"><img id="char1" alt="Personaje 1"><div class="ph">🎃</div></div>
+          <div class="char"><img id="char2" alt="Personaje 2"><div class="ph">👻</div></div>
+          <div class="char"><img id="char3" alt="Personaje 3"><div class="ph">🦇</div></div>
+        </section>
+
+        <section class="actions">
+          <a id="btnMap" class="btn" href="#" target="_blank" rel="noopener">Ver ubicación</a>
+          <button class="btn secondary" id="btnSpook">Música ON/OFF</button>
+        </section>
+
+        <div class="plate">¡Trae tu disfraz! — Toca “Ver ubicación” para abrir el mapa.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gate" id="gate">
+    <div style="text-align:center;max-width:360px">
+      <h3 style="margin:0 0 6px">🎃 Invitación dinámica</h3>
+      <p style="opacity:.85;margin:0 0 12px">Toca <b>Entrar</b> para activar la <i>música tétrica infantil</i> y las animaciones (dura ~3 minutos).</p>
+    </div>
+    <button class="enter" id="enterBtn">Entrar</button>
+  </div>
+  <div class="muter"><button class="btn" id="muteBtn">🔊 Volumen</button></div>
+
+<script>
+// ===================== CONFIG =====================
+const ADDRESS = 'Portal de Hierro, Privada Los Reyes';
+const CHAR_URL_1 = ''; const CHAR_URL_2 = ''; const CHAR_URL_3 = '';
+
+// Carga de imágenes
+[['char1', CHAR_URL_1], ['char2', CHAR_URL_2], ['char3', CHAR_URL_3]].forEach(([id, url]) => {
+  const img = document.getElementById(id);
+  const ph = img?.nextElementSibling;
+  if(url){ img.src = url; img.onload = () => { img.style.display='block'; if(ph) ph.style.display='none'; }; } else { img.style.display='none'; }
+});
+
+// Ubicación
+const mapsQ = encodeURIComponent(ADDRESS);
+const mapsSearch = 'https://www.google.com/maps/search/?api=1&query='+mapsQ;
+const mapsDirections = 'https://www.google.com/maps/dir/?api=1&destination=' + mapsQ;
+document.getElementById('btnMap').addEventListener('click', () => {
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(()=>window.open(mapsDirections,'_blank'),
+      ()=>window.open(mapsSearch,'_blank'), {timeout:1500});
+  } else window.open(mapsSearch,'_blank');
+});
+
+// ===================== MÚSICA — Scheduler 3 minutos =====================
+let ctx, master, isMuted=false, isPlaying=false, stopAt=0;
+let nodes = [];
+const BPM = 104; const STEP = 60/BPM; // negra
+
+function initAudio(){ if(ctx) return; ctx = new (window.AudioContext||window.webkitAudioContext)(); master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination); }
+
+function note(freq, t, dur, type='square', vol=0.12){
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  const d = ctx.createDelay(0.6); d.delayTime.value = 0.22;
+  const fb = ctx.createGain(); fb.gain.value = 0.35;
+  d.connect(fb).connect(d);
+  o.connect(g); g.connect(d).connect(master); g.connect(master);
+  o.start(t); o.stop(t+dur+0.05);
+  nodes.push(o,g,d,fb);
+}
+
+function hat(t){
+  const bs = 2*ctx.sampleRate, buf = ctx.createBuffer(1, bs, ctx.sampleRate), data = buf.getChannelData(0);
+  for(let i=0;i<bs;i++) data[i] = Math.random()*2-1;
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.12, t+0.005); g.gain.exponentialRampToValueAtTime(0.0001, t+0.06);
+  src.connect(g).connect(master); src.start(t); src.stop(t+0.08); nodes.push(src,g);
+}
+
+function scheduleBar(t0){
+  // A minor: melodía sencilla + bajo
+  const A=220, B=247, C=262, D=294, E=330, F=349, G=392, A2=440;
+  const melody = [A2, G, E, C, A, C, E, G]; // 8 pasos
+  for(let i=0;i<melody.length;i++){ note(melody[i], t0 + i*STEP*0.75, STEP*0.65, 'triangle', 0.16); }
+  // Bajo
+  note(A/2, t0, STEP*1.5, 'square', 0.08);
+  note(E/2, t0 + STEP, STEP*1.5, 'square', 0.07);
+  // Hats
+  for(let i=0;i<4;i++){ hat(t0 + i*STEP/2); }
+}
+
+function seqStart(){
+  if(isPlaying) return;
+  isPlaying = true;
+  const now = ctx.currentTime;
+  stopAt = now + 180; // 3 minutos
+  let t = now + 0.05;
+  // ambient pad continuo (rellena si el navegador pausa microtareas)
+  const pad = ctx.createOscillator(); pad.type='sawtooth'; pad.frequency.value = 110;
+  const pg = ctx.createGain(); pg.gain.value = 0.03; pad.connect(pg).connect(master); pad.start(now); pad.stop(stopAt+0.2); nodes.push(pad,pg);
+
+  // Planificador: programa barras anticipadamente mientras no se alcance stopAt
+  function loopSchedule(){
+    if(!isPlaying) return;
+    const ahead = 2.0; // programa 2s por delante
+    while(t < ctx.currentTime + ahead && t < stopAt){
+      scheduleBar(t);
+      t += STEP*6; // longitud de la barra programada
+    }
+    if(t < stopAt) requestAnimationFrame(loopSchedule);
+    else { isPlaying = false; }
+  }
+  loopSchedule();
+}
+
+function seqStop(){ isPlaying = false; nodes.forEach(n=>{ try{ n.stop && n.stop() }catch(_){ } try{ n.disconnect && n.disconnect() }catch(_){ } }); nodes=[]; }
+
+document.getElementById('enterBtn').addEventListener('click', async ()=>{ initAudio(); seqStart(); document.getElementById('gate').classList.add('hidden'); });
+document.getElementById('btnSpook').addEventListener('click', ()=>{ if(!ctx){ initAudio(); seqStart(); document.getElementById('gate').classList.add('hidden'); return; } if(isPlaying){ seqStop(); } else { seqStart(); } document.getElementById('card').classList.add('shake'); setTimeout(()=>document.getElementById('card').classList.remove('shake'), 450); });
+document.getElementById('muteBtn').addEventListener('click', ()=>{ if(!ctx) return; isMuted = !isMuted; master.gain.value = isMuted ? 0 : 0.9; document.getElementById('muteBtn').textContent = isMuted ? '🔇 Silencio' : '🔊 Volumen'; });
+window.addEventListener('keydown', ()=>{ if(!ctx){ initAudio(); seqStart(); document.getElementById('gate').classList.add('hidden'); } }, {once:true});
+</script>
+</body>
+</html>
