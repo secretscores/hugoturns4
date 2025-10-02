@@ -1,317 +1,355 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🎃 Happy Halloween Birthday 🧟</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Creepster&display=swap" rel="stylesheet">
-    <style>
-        /* Variables y Base */
-        :root {
-            --dark-bg: #1A002C; /* Fondo muy oscuro */
-            --accent-purple: #9D3CFF; /* Morado eléctrico */
-            --accent-orange: #FF8C00; /* Naranja neón */
-            --text-color: #E0E0E0;
-            --font-main: 'Montserrat', sans-serif;
-            --font-title: 'Creepster', cursive;
-        }
-
-        body {
-            font-family: var(--font-main);
-            color: var(--text-color);
-            background-color: var(--dark-bg);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-            position: relative;
-            /* Efecto de ruido/estrellas en el fondo para un look moderno */
-            background-image: radial-gradient(#300050 40%, transparent 40%),
-                              radial-gradient(#300050 20%, transparent 20%);
-            background-size: 5px 5px;
-            background-position: 0 0, 10px 10px;
-        }
-
-        /* --- PANTALLA DE INICIO (PORTAL) --- */
-        #welcome-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--dark-bg);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            cursor: pointer;
-            transition: opacity 0.5s ease-out;
-        }
-
-        .portal-text {
-            font-family: var(--font-title); /* Usar la fuente Creepster para este título también */
-            font-size: 3em; /* <-- AJUSTE DE TAMAÑO: Un poco más grande para mejor visibilidad */
-            font-weight: 700;
-            color: var(--accent-orange);
-            text-shadow: 0 0 8px rgba(255, 140, 0, 0.7), /* <-- AJUSTE PRINCIPAL: Sombra más concentrada */
-                         0 0 15px rgba(255, 140, 0, 0.5), /* Un segundo brillo más suave */
-                         0 0 25px rgba(255, 140, 0, 0.3); /* Un brillo exterior muy difuso */
-            margin-bottom: 20px;
-            animation: flicker 1s infinite alternate; /* Efecto de neón */
-            line-height: 1.1; /* Asegura que no haya demasiado espacio vertical */
-        }
-        .portal-icon {
-            font-size: 4em;
-            color: var(--accent-purple);
-            animation: pulse-icon 1.5s infinite alternate;
-        }
-
-        /* --- TARJETA PRINCIPAL (ESTILO APP) --- */
-        .invitation-card {
-            width: 90%;
-            max-width: 380px;
-            min-height: 600px;
-            background: linear-gradient(145deg, rgba(26, 0, 44, 0.95) 0%, rgba(32, 0, 48, 0.9) 100%);
-            border-radius: 30px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.7), 0 0 25px var(--accent-purple);
-            padding: 30px 20px;
-            box-sizing: border-box;
-            text-align: center;
-            position: relative;
-            z-index: 50;
-            /* Animación de apertura: se desvanece y rota */
-            opacity: 0;
-            transform: scale(0.8) rotateY(-15deg); 
-            transition: opacity 1s ease-out, transform 1s ease-out;
-        }
-
-        /* Título Principal (Estilo Neón/Game) */
-        h1 {
-            font-family: var(--font-title);
-            font-size: 3.5em;
-            color: var(--accent-orange);
-            text-shadow: 0 0 10px var(--accent-orange), 0 0 20px rgba(255, 140, 0, 0.5);
-            margin-bottom: 15px;
-            line-height: 1.1;
-            transform: scale(0.9);
-            animation: title-pop 0.8s ease-out forwards;
-            font-weight: 900; 
-        }
-        @keyframes title-pop {
-            0% { opacity: 0; transform: scale(0.5); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        /* Subtítulos y Texto */
-        h2 {
-            font-size: 1.2em;
-            font-weight: 700;
-            color: var(--accent-purple);
-            margin: 10px 0 25px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        p {
-            font-size: 1em;
-            margin: 15px 0;
-            line-height: 1.5;
-            color: var(--text-color);
-        }
-
-        /* Detalles del Evento (Panel de Datos) */
-        .data-panel {
-            background-color: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--accent-purple);
-            border-radius: 10px;
-            padding: 20px 10px;
-            margin: 30px 0;
-            box-shadow: 0 0 15px rgba(157, 60, 255, 0.3);
-            text-align: left;
-        }
-        .data-panel p {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 15px;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
-            font-weight: 700; 
-        }
-        .data-panel p:last-child {
-            border-bottom: none;
-        }
-        .data-panel span {
-            font-weight: 900;
-            color: var(--accent-orange);
-            text-shadow: 0 0 5px rgba(255, 140, 0, 0.5);
-        }
-
-        /* Botón de Ubicación (Glow) */
-        .location-button {
-            display: block;
-            margin: 30px auto;
-            padding: 18px 30px;
-            background: var(--accent-purple);
-            color: #fff; 
-            text-decoration: none;
-            font-weight: 900;
-            border-radius: 50px;
-            box-shadow: 0 0 20px var(--accent-purple);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            border: none;
-        }
-
-        .location-button:hover {
-            background: var(--accent-orange);
-            color: #fff;
-            box-shadow: 0 0 25px var(--accent-orange);
-            transform: scale(1.05);
-        }
-
-        /* --- Elementos de Efecto (Flotantes) --- */
-        .effect-item {
-            position: absolute;
-            font-size: 3em;
-            opacity: 0.5;
-            pointer-events: none;
-            animation: float-and-sway 15s linear infinite;
-            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
-        
-            z-index: 9999;
-        }
-
-        .effect-item:nth-child(1) { top: 5%; left: 5%; animation-duration: 10s; color: var(--accent-orange); }
-        .effect-item:nth-child(2) { top: 25%; right: 10%; animation-duration: 11s; animation-delay: 3s; color: var(--accent-purple); }
-        .effect-item:nth-child(3) { bottom: 6%; left: 20%; animation-duration: 12s; animation-delay: 3s; color: var(--text-color); }
-        .effect-item:nth-child(4) { bottom: 38%; left: 26%; animation-duration: 13s; animation-delay: 3s; color: var(--text-color); transform: rotate(-15deg); }
-        
-        /* Animación de los elementos flotantes */
-        @keyframes float-and-sway {
-            0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
-            20% { opacity: 0.7; }
-            50% { transform: translate(10px, -20px) rotate(5deg); opacity: 0.9; }
-            80% { opacity: 0.7; }
-            100% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
-        }
-
-        @keyframes flicker {
-            0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; text-shadow: 0 0 8px rgba(255, 140, 0, 0.7), 0 0 15px rgba(255, 140, 0, 0.5); } /* Ajustado aquí también */
-            20%, 24%, 55% { opacity: 0.6; text-shadow: none; } /* Opacidad en el flicker bajada un poco */
-        }
-        @keyframes pulse-icon {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.1); }
-        }
-
-        /* Clase para la animación de entrada de la tarjeta */
-        .show-card {
-            opacity: 1 !important;
-            transform: scale(1) rotateY(0deg) !important;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>🎃 Happy Halloween Birthday 🧟</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Creepster&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --dark-bg:#1A002C; --accent-purple:#9D3CFF; --accent-orange:#FF8C00; --text-color:#E0E0E0;
+      --font-main:'Montserrat',sans-serif; --font-title:'Creepster',cursive;
+    }
+    body{
+      font-family:var(--font-main); color:var(--text-color); background-color:var(--dark-bg);
+      margin:0; padding:0; display:flex; justify-content:center; align-items:center; min-height:100vh;
+      overflow:hidden; position:relative;
+      background-image:radial-gradient(#300050 40%,transparent 40%), radial-gradient(#300050 20%,transparent 20%);
+      background-size:5px 5px; background-position:0 0, 10px 10px;
+    }
+    #welcome-screen{
+      position:fixed; inset:0; background-color:var(--dark-bg);
+      display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:1000;
+      cursor:pointer; transition:opacity .5s ease-out;
+    }
+    .portal-text{
+      font-family:var(--font-title); font-size:3em; font-weight:700; color:var(--accent-orange);
+      text-shadow:0 0 8px rgba(255,140,0,.7), 0 0 15px rgba(255,140,0,.5), 0 0 25px rgba(255,140,0,.3);
+      margin-bottom:20px; animation:flicker 1s infinite alternate; line-height:1.1;
+    }
+    .portal-icon{ font-size:4em; color:var(--accent-purple); animation:pulse-icon 1.5s infinite alternate; }
+    .invitation-card{
+      width:90%; max-width:380px; min-height:600px;
+      background:linear-gradient(145deg, rgba(26,0,44,.95) 0%, rgba(32,0,48,.9) 100%);
+      border-radius:30px; box-shadow:0 15px 50px rgba(0,0,0,.7), 0 0 25px var(--accent-purple);
+      padding:30px 20px; box-sizing:border-box; text-align:center; position:relative; z-index:50;
+      opacity:0; transform:scale(.8) rotateY(-15deg); transition:opacity 1s ease-out, transform 1s ease-out;
+    }
+    h1{
+      font-family:var(--font-title); font-size:3.5em; color:var(--accent-orange);
+      text-shadow:0 0 10px var(--accent-orange), 0 0 20px rgba(255,140,0,.5);
+      margin-bottom:15px; line-height:1.1; transform:scale(.9); animation:title-pop .8s ease-out forwards; font-weight:900;
+    }
+    @keyframes title-pop{0%{opacity:0;transform:scale(.5)}100%{opacity:1;transform:scale(1)}}
+    h2{ font-size:1.2em; font-weight:700; color:var(--accent-purple); margin:10px 0 25px; text-transform:uppercase; letter-spacing:2px; }
+    p{ font-size:1em; margin:15px 0; line-height:1.5; color:var(--text-color); }
+    .data-panel{
+      background-color:rgba(0,0,0,.2); border:1px solid var(--accent-purple); border-radius:10px;
+      padding:20px 10px; margin:30px 0; box-shadow:0 0 15px rgba(157,60,255,.3); text-align:left;
+    }
+    .data-panel p{ display:flex; justify-content:space-between; align-items:center; padding:5px 15px;
+      border-bottom:1px dashed rgba(255,255,255,.1); font-weight:700; }
+    .data-panel p:last-child{ border-bottom:none; }
+    .data-panel span{ font-weight:900; color:var(--accent-orange); text-shadow:0 0 5px rgba(255,140,0,.5); }
+    .location-button{
+      display:block; margin:30px auto; padding:18px 30px; background:var(--accent-purple); color:#fff; text-decoration:none;
+      font-weight:900; border-radius:50px; box-shadow:0 0 20px var(--accent-purple); text-transform:uppercase; letter-spacing:1px;
+      transition:all .3s ease; position:relative; overflow:hidden; border:none;
+    }
+    .location-button:hover{ background:var(--accent-orange); color:#fff; box-shadow:0 0 25px var(--accent-orange); transform:scale(1.05); }
+    .effect-item{
+      position:absolute; font-size:3em; opacity:.5; pointer-events:none; animation:float-and-sway 15s linear infinite;
+      filter:drop-shadow(0 0 5px rgba(255,255,255,.5)); z-index:9999;
+    }
+    .effect-item:nth-child(1){ top:5%; left:5%; animation-duration:10s; color:var(--accent-orange); }
+    .effect-item:nth-child(2){ top:25%; right:10%; animation-duration:11s; animation-delay:3s; color:var(--accent-purple); }
+    .effect-item:nth-child(3){ bottom:6%; left:20%; animation-duration:12s; animation-delay:3s; color:var(--text-color); }
+    .effect-item:nth-child(4){ bottom:38%; left:26%; animation-duration:13s; animation-delay:3s; color:var(--text-color); transform:rotate(-15deg); }
+    @keyframes float-and-sway{
+      0%{transform:translate(0,0) rotate(0deg); opacity:0}
+      20%{opacity:.7}
+      50%{transform:translate(10px,-20px) rotate(5deg); opacity:.9}
+      80%{opacity:.7}
+      100%{transform:translate(0,0) rotate(0deg); opacity:0}
+    }
+    @keyframes flicker{
+      0%,18%,22%,25%,53%,57%,100%{opacity:1; text-shadow:0 0 8px rgba(255,140,0,.7), 0 0 15px rgba(255,140,0,.5)}
+      20%,24%,55%{opacity:.6; text-shadow:none}
+    }
+    @keyframes pulse-icon{0%{transform:scale(1)}100%{transform:scale(1.1)}}
+    .show-card{ opacity:1 !important; transform:scale(1) rotateY(0deg) !important; }
+  </style>
 </head>
 <body>
+  <div id="welcome-screen">
+    <h1 class="portal-text">HUGO TURNS 4!</h1>
+    <p>¿Están listos?...</p>
+    <div class="portal-icon">🎃</div>
+    <p class="small-instruction" style="margin-top:50px; color:var(--accent-purple);">Toca la pantalla para abrir el portal</p>
+  </div>
 
-    <div id="welcome-screen">
-        <h1 class="portal-text">HUGO TURNS 4!</h1>
-        <p>¿Están listos?...</p>
-        <div class="portal-icon">🎃</div>
-        <p class="small-instruction" style="margin-top: 50px; color: var(--accent-purple);">Toca la pantalla para abrir el portal</p>
+  <!-- Tarjeta -->
+  <div class="invitation-card" id="invitation-card-content">
+    <span class="effect-item">🦇</span>
+    <span class="effect-item">🎃</span>
+    <span class="effect-item">🧟</span>
+    <span class="effect-item">👻</span>
+
+    <h1 class="portal-text">HUGO TURNS 4!</h1>
+    <h2>Happy Halloween Birthday</h2>
+    <p>¡Acompáñanos a celebrar el cumple número 4 de Hugo, te esperamos!</p>
+
+    <div class="data-panel">
+      <p>FECHA: <span>🎃 30 DE OCTUBRE</span></p>
+      <p>HORA: <span>🕰️ 04:00 PM</span></p>
+      <p>TIP: <span>👻 Trae tu Disfraz</span></p>
+      <p>LUGAR: <span>🗺️ Privada Los Reyes</span></p>
     </div>
 
-    <audio id="background-music" loop>
-        <source src="URL_MUSICA_ELECTRO_HALLOWEEN.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="entry-sound">
-        <source src="URL_SONIDO_PORTAL_SFX.mp3" type="audio/mpeg">
-    </audio>
+    <a id="map-link" href="#" class="location-button" target="_blank">UBICACIÓN</a>
+    <p style="font-size:.9em; color:var(--accent-purple);">Buuu!</p>
+  </div>
 
-    <div class="invitation-card" id="invitation-card-content">
-        
-        <span class="effect-item">🦇</span>
-        <span class="effect-item">🎃</span>
-        <span class="effect-item">🧟</span>
-        <span class="effect-item">👻</span>
+  <script>
+    /* =========================
+       CONFIG EVENTO & MAP LINK
+       ========================= */
+    const LATITUD = 25.757046;
+    const LONGITUD = -109.023735;
+    const LUGAR_FIESTA = "Fiesta de Hugo";
 
-        <h1>¡Hugo Turns 4!</h1>
-        <h2>Happy Halloween Birthday</h2>
+    function createMapLink(lat, lng, label){
+      const isApple = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      return isApple
+        ? `http://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(label)}&z=15`
+        : `https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place_id=${encodeURIComponent(label)}`;
+    }
+    const mapLink = document.getElementById('map-link');
+    mapLink.href = createMapLink(LATITUD, LONGITUD, LUGAR_FIESTA);
 
-        <p>¡Acomápaños a celebrar el cumple número 4 de Hugo, te esperamos!</p>
-        
-        <div class="data-panel">
-            <p>FECHA: <span>🎃 30 DE OCTUBRE</span></p>
-            <p>HORA: <span>🕰️ 04:00 PM</span></p>
-            <p>TIP: <span>👻 Trae tu Disfraz</span></p>
-            <p>LUGAR: <span>🗺️ Privada Los Reyes</span></p>
-        </div>
+    /* =========================
+       WEB AUDIO: SINTETIZADOR 80s
+       ========================= */
+    let ctx, master, delay, delayFeedback, filter, limiter;
+    let running = false;
 
-        <a id="map-link" href="#" class="location-button" target="_blank">
-            UBICACIÓN
-        </a>
+    // Ajustes de "tema"
+    const BPM = 92;                  // tempo ochentero
+    const SCALE = [0,2,3,5,7,10];    // dórico/menor (intervalos)
+    const ROOT = 58;                 // A#2 (nota base para bajo)
+    const LEAD_ROOT = 70;            // A#4 para lead
 
-        <p style="font-size: 0.9em; color: var(--accent-purple);">Confirma tu asistencia al +52 123 456 7890</p>
-    </div>
+    // ADSR
+    const ADSR = { a:0.01, d:0.12, s:0.6, r:0.2 };
+    const LEAD_ADSR = { a:0.005, d:0.08, s:0.5, r:0.15 };
 
-    <script>
-        // --- CONFIGURACIÓN DE LA FIESTA ---
-        const LATITUD = 25.757046;
-        const LONGITUD = -109.023735;
-        const LUGAR_FIESTA = "Fiesta de Hugo"; 
+    // Paso en segundos (16th)
+    const stepDur = 60 / (BPM * 4);
 
-        // --- FUNCIONALIDAD DE INTERACCIÓN Y AUDIO ---
-        const welcomeScreen = document.getElementById('welcome-screen');
-        const invitationCardContent = document.getElementById('invitation-card-content');
-        const bgMusic = document.getElementById('background-music');
-        const entrySound = document.getElementById('entry-sound');
-        const mapLink = document.getElementById('map-link');
+    // Patrones
+    const bassPattern = [0,0,7,7, 5,5,3,3, 0,0,7,7, 5,3,2,2]; // grados
+    const leadPattern = [0,2,3,5, 7,5,3,2, 0,3,5,7, 10,7,5,3]; // spooky arpeggio
 
-        // 1. Configuración del Enlace al Mapa (Mejorado para iOS/Android)
-        function createMapLink(lat, lng, label) {
-            const isAppleDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-            let url;
-            if (isAppleDevice) {
-                // Abre Apple Maps con el marcador
-                url = `http://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(label)}&z=15`;
-            } else {
-                // Abre Google Maps (funciona bien en Android y otros navegadores)
-                url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place_id=${encodeURIComponent(label)}`;
-            }
-            return url;
+    function midiToFreq(m){ return 440 * Math.pow(2, (m-69)/12); }
+
+    function envGain(t0, a,d,s,r, peak=1, sus=0.7){
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(peak, t0 + a);
+      g.gain.linearRampToValueAtTime(sus, t0 + a + d);
+      // el release se programa fuera
+      return g;
+    }
+
+    function scheduleOsc({time, midi, type='square', cutoff=1400, adsr=ADSR, vol=0.6, pan=0}){
+      const osc = ctx.createOscillator();
+      const amp = envGain(time, adsr.a, adsr.d, adsr.s, adsr.r, 1, 0.7);
+      const panner = new StereoPannerNode(ctx, { pan });
+
+      osc.type = type;
+      osc.frequency.setValueAtTime(midiToFreq(midi), time);
+
+      // Filtro suave para color 80s
+      const vcf = ctx.createBiquadFilter();
+      vcf.type = 'lowpass';
+      vcf.frequency.setValueAtTime(cutoff, time);
+      vcf.Q.value = 0.8;
+
+      // Cadena: osc -> amp -> vcf -> delay -> master
+      osc.connect(amp).connect(vcf).connect(delay).connect(master);
+      vcf.connect(panner).connect(delay); // un toque estéreo antes del delay
+
+      // Volumen por nota
+      amp.gain.setValueAtTime(0, time);
+      amp.gain.linearRampToValueAtTime(vol, time + adsr.a);
+      amp.gain.linearRampToValueAtTime(vol*adsr.s, time + adsr.a + adsr.d);
+
+      osc.start(time);
+      // Release
+      amp.gain.setTargetAtTime(0.0001, time + stepDur*0.95, adsr.r);
+      osc.stop(time + stepDur + adsr.r + 0.05);
+    }
+
+    function initAudio(){
+      if (ctx) return;
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+      master = ctx.createGain();
+      master.gain.setValueAtTime(0.35, ctx.currentTime);
+
+      // Pequeño limitador (soft)
+      limiter = ctx.createDynamicsCompressor();
+      limiter.threshold.value = -10;
+      limiter.knee.value = 18;
+      limiter.ratio.value = 8;
+      limiter.attack.value = 0.003;
+      limiter.release.value = 0.15;
+
+      delay = ctx.createDelay(0.6);
+      delay.delayTime.setValueAtTime(0.28, ctx.currentTime); // eco rapidito ochentero
+
+      delayFeedback = ctx.createGain();
+      delayFeedback.gain.setValueAtTime(0.32, ctx.currentTime); // feedback moderado
+      delay.connect(delayFeedback).connect(delay);
+
+      // Filtro global muy leve para redondear
+      filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(9000, ctx.currentTime);
+
+      // Cadena master
+      delay.connect(filter).connect(limiter).connect(ctx.destination);
+      master.connect(delay);
+    }
+
+    // Secuenciador básico
+    let step = 0;
+    let schedulerId = null;
+
+    function startSequence(){
+      if (running) return;
+      running = true;
+      const lookAhead = 0.1;    // s
+      const scheduleHorizon = 0.25; // s
+      let nextNoteTime = ctx.currentTime + 0.05;
+
+      function scheduler(){
+        while (nextNoteTime < ctx.currentTime + scheduleHorizon){
+          const s = step % 16;
+
+          // BASS
+          const bassDegree = bassPattern[s];
+          const bassMidi = ROOT + SCALE[bassDegree % SCALE.length];
+          scheduleOsc({
+            time: nextNoteTime,
+            midi: bassMidi,
+            type: 'triangle',
+            cutoff: 900,
+            adsr: {a:0.005, d:0.08, s:0.7, r:0.08},
+            vol: 0.45,
+            pan: -0.05
+          });
+
+          // LEAD (en offbeats para sensación inquietante)
+          if (s % 2 === 1){
+            const leadDegree = leadPattern[s];
+            const leadMidi = LEAD_ROOT + SCALE[leadDegree % SCALE.length];
+            scheduleOsc({
+              time: nextNoteTime,
+              midi: leadMidi,
+              type: 'square',
+              cutoff: 1600,
+              adsr: LEAD_ADSR,
+              vol: 0.30,
+              pan: 0.08
+            });
+          }
+
+          // "campanilla" fantasmita en 4 y 12
+          if (s === 4 || s === 12){
+            scheduleOsc({
+              time: nextNoteTime + stepDur*0.02,
+              midi: LEAD_ROOT + 12, // una octava arriba
+              type: 'sine',
+              cutoff: 4000,
+              adsr: {a:0.003, d:0.06, s:0.3, r:0.12},
+              vol: 0.22,
+              pan: 0.15
+            });
+          }
+
+          nextNoteTime += stepDur; // avanzar un 16th
+          step++;
         }
-        mapLink.href = createMapLink(LATITUD, LONGITUD, LUGAR_FIESTA);
+        schedulerId = setTimeout(scheduler, lookAhead*1000);
+      }
+      scheduler();
+    }
 
-        // 2. Evento al Tocar el Portal
-        welcomeScreen.addEventListener('click', () => {
-            // Transición del Portal a la Tarjeta
-            welcomeScreen.style.opacity = '0';
-            invitationCardContent.classList.add('show-card'); 
+    function stopSequence(){
+      running = false;
+      if (schedulerId){ clearTimeout(schedulerId); schedulerId = null; }
+    }
 
-            setTimeout(() => {
-                welcomeScreen.style.display = 'none';
-            }, 500);
+    // "Golpe" de entrada (impacto corto sintetizado)
+    function playPortalHit(){
+      const t0 = ctx.currentTime + 0.02;
+      const osc = ctx.createOscillator();
+      const amp = ctx.createGain();
+      const vcf = ctx.createBiquadFilter();
+      vcf.type = 'bandpass';
+      vcf.frequency.setValueAtTime(600, t0);
 
-            // Reproducir sonidos
-            try {
-                // Sonido de "Susto/Flash" o de "Portal"
-                entrySound.volume = 1.0; 
-                entrySound.play();
-                
-                // Música de fondo (se inicia después del sonido fuerte)
-                setTimeout(() => {
-                    bgMusic.volume = 0.3; // Volumen bajo para que el texto sea legible
-                    bgMusic.play().catch(e => console.error("Música de fondo no pudo iniciarse:", e));
-                }, 700); 
-            } catch (error) {
-                console.error("Error al reproducir audio:", error);
-            }
-        });
-    </script>
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(180, t0);
+      osc.frequency.exponentialRampToValueAtTime(60, t0 + 0.35);
+
+      amp.gain.setValueAtTime(0, t0);
+      amp.gain.linearRampToValueAtTime(0.9, t0 + 0.01);
+      amp.gain.exponentialRampToValueAtTime(0.001, t0 + 0.4);
+
+      osc.connect(vcf).connect(amp).connect(delay).connect(master);
+      osc.start(t0);
+      osc.stop(t0 + 0.45);
+    }
+
+    /* =========================
+       INTERACCIÓN UI
+       ========================= */
+    const welcomeScreen = document.getElementById('welcome-screen');
+    const invitationCardContent = document.getElementById('invitation-card-content');
+
+    welcomeScreen.addEventListener('click', async () => {
+      // Transición UI
+      welcomeScreen.style.opacity = '0';
+      invitationCardContent.classList.add('show-card');
+      setTimeout(()=>welcomeScreen.style.display='none', 500);
+
+      // Audio
+      initAudio();
+      try{ await ctx.resume(); }catch(e){}
+      playPortalHit();
+      setTimeout(()=> startSequence(), 700);
+    });
+
+    // Seguridad: detener al cambiar de pestaña para ahorrar batería
+    document.addEventListener('visibilitychange', ()=>{
+      if (!ctx) return;
+      if (document.hidden){ stopSequence(); }
+      else if (!running){ startSequence(); }
+    });
+
+    // Exponer ajustes rápidos en consola si lo necesitas:
+    window.__halloweenAudio = {
+      setTempo:(bpm)=>{ /* cambia en vivo próximo compás */
+        // Nota: para un cambio limpio, podrías parar y re-arrancar:
+        stopSequence();
+        const newStepDur = 60/(bpm*4);
+        // reasignar stepDur "dinámicamente" recreando la secuencia:
+        Object.defineProperty(window, 'stepDur', { value:newStepDur, writable:false, configurable:true });
+        startSequence();
+      }
+    };
+  </script>
 </body>
 </html>
