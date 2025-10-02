@@ -7,7 +7,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Creepster&display=swap" rel="stylesheet">
   <style>
     :root{
-      --dark-bg:#10001D; --accent-purple:#9D3CFF; --accent-orange:#FF8C00; --text-color:#E0E0E0;
+      --dark-bg:#10001D; --accent-purple:#9D3CFF; --accent-orange:#FF8C00; --accent-purple:#9D3CFF;
+--text-color:#E0E0E0;
       --font-main:'Montserrat',sans-serif; --font-title:'Creepster',cursive;
     }
     body{
@@ -51,6 +52,12 @@
       padding:30px 20px; box-sizing:border-box; text-align:center; position:relative; z-index:50;
       opacity:0; transform:scale(.8) rotateY(-15deg); transition:opacity 1s ease-out, transform 1s ease-out;
     }
+
+  .neon-flicker {
+  font-weight:700;
+  color:var(--accent-purple);
+  animation:flicker-purple 1.5s infinite alternate;
+}
 
     h1{
       font-family:var(--font-title); font-size:3.5em; color:var(--accent-orange);
@@ -96,9 +103,9 @@
       filter:drop-shadow(0 0 5px rgba(255,255,255,.5)); z-index:9999;
     }
     .effect-item:nth-child(1){ top:5%; left:5%; animation-duration:5s; color:var(--accent-orange); }
-    .effect-item:nth-child(2){ top:25%; right:10%; animation-duration:4s; animation-delay:2s; color:var(--accent-purple); }
-    .effect-item:nth-child(3){ bottom:6%; left:15%; animation-duration:5s; animation-delay:2s; color:var(--text-color); }
-    .effect-item:nth-child(4){ bottom:38%; left:26%; animation-duration:6s; animation-delay:3s; color:var(--text-color); }
+    .effect-item:nth-child(2){ top:25%; right:10%; animation-duration:7s; animation-delay:2s; color:var(--accent-purple); }
+    .effect-item:nth-child(3){ bottom:6%; left:15%; animation-duration:9s; animation-delay:3s; color:var(--text-color); }
+    .effect-item:nth-child(4){ bottom:38%; left:26%; animation-duration:11s; animation-delay:4s; color:var(--text-color); }
 
     /* Animaciones */
     @keyframes float-and-sway{
@@ -108,6 +115,21 @@
       80%{opacity:.7}
       100%{transform:translate(0,0) rotate(0deg); opacity:0}
     }
+
+@keyframes flicker-purple {
+  0%,18%,22%,25%,53%,57%,100% {
+    opacity:1;
+    text-shadow:
+      0 0 8px rgba(157,60,255,0.9),
+      0 0 16px rgba(157,60,255,0.7),
+      0 0 28px rgba(157,60,255,0.5);
+  }
+  20%,24%,55% {
+    opacity:.6;
+    text-shadow:none;
+  }
+}
+    
     @keyframes flicker{
       0%,18%,22%,25%,53%,57%,100%{opacity:1; text-shadow:0 0 8px rgba(255,140,0,.7), 0 0 15px rgba(255,140,0,.5)}
       20%,24%,55%{opacity:.6; text-shadow:none}
@@ -155,7 +177,7 @@
 <!--    <p>¿Están listos?...</p> -->
     <!-- Imagen de bienvenida -->
     <img src="happyhw1.png" alt="Happy Halloween" class="portal-img">
-    <p class="small-instruction" style="margin-top:50px; color:var(--accent-purple);">Toca la pantalla...</p>
+    <p class="small-instruction neon-flicker" style="margin-top:50px;">Toca la pantalla...</p>
   </div>
 
   <!-- Tarjeta -->
@@ -173,7 +195,7 @@
     <div class="data-panel">
       <p>FECHA: <span>🎃 30 DE OCTUBRE</span></p>
       <p>HORA: <span>🕰️ 04:00 PM</span></p>
-      <p>TIP: <span>👻 Trae tu Disfraz</span></p>
+      <p>NOTA: <span>👻 Trae tu Disfraz</span></p>
       <p>LUGAR: <span>🗺️ Privada Los Reyes,<br>Portal de Hierro</span></p>
     </div>
 
@@ -205,6 +227,9 @@
     const welcomeScreen = document.getElementById('welcome-screen');
     const invitationCardContent = document.getElementById('invitation-card-content');
     if (!welcomeScreen || !invitationCardContent) return;
+
+    let buzz, buzzGain, buzzFilter, buzzTimer = null;
+    const FLICKER_PERIOD = 1.5; // igual que tu animación del botón
 
     let ctx, master, bus, limiter, delayA, delayB, darkLP;
     let running = false, step = 0, schedId = null, fxTimer = null;
@@ -266,6 +291,33 @@
       limiter.threshold.value=-12; limiter.knee.value=18; limiter.ratio.value=8;
       limiter.attack.value=0.003; limiter.release.value=0.2;
       master.connect(limiter).connect(ctx.destination);
+
+      // ---- Buzz eléctrico (ruido) ----
+function setupBuzz(){
+  if (buzz) return;
+  // buffer de ruido blanco de 2s
+  const dur = 2.0;
+  const buffer = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < data.length; i++){
+    data[i] = (Math.random() * 2 - 1) * 0.6; // ruido blanco
+  }
+  buzz = ctx.createBufferSource();
+  buzz.buffer = buffer;
+  buzz.loop = true;
+
+  buzzFilter = ctx.createBiquadFilter();
+  buzzFilter.type = 'bandpass';
+  buzzFilter.frequency.value = 1200; // brillo "eléctrico"
+  buzzFilter.Q.value = 1.1;
+
+  buzzGain = gain(0.0); // arrancamos silencioso (lo modulamos luego)
+  // Lo mandamos directo al master para que quede "debajo" de la música
+  buzz.connect(buzzFilter).connect(buzzGain).connect(master);
+  buzz.start();
+}
+setupBuzz();
+
     }
 
     function playBass(time, midi, vol=0.36){
@@ -384,6 +436,8 @@
       fxLoop();
     }
 
+    startBuzzSync();
+
     function stopSeq(){
       running = false;
       if (schedId){ clearTimeout(schedId); schedId = null; }
@@ -399,6 +453,7 @@
       if (!ctx) init();
       try{ await ctx.resume(); }catch(e){}
       startSeq();
+      startBuzzSync(); // 👈 encendemos el zumbido sincronizado
       portalHit();
     }, { passive:true });
 
@@ -411,11 +466,55 @@
       o.connect(bp).connect(a).connect(bus); o.start(t); o.stop(t+0.36);
     }
 
-    document.addEventListener('visibilitychange', ()=>{
-      if (!ctx) return;
-      if (document.hidden){ stopSeq(); }
-      else if (!running){ startSeq(); }
-    });
+    function scheduleBuzzCycle(t0){
+  if (!buzzGain) return;
+  // Copiamos la lógica del keyframe: ON en 0,18,22,25,53,57,100% y OFF en 20,24,55%
+  const onMarks  = [0, 0.18, 0.22, 0.25, 0.53, 0.57, 1.00];
+  const offMarks = [0.20, 0.24, 0.55];
+
+  // nivel del buzz cuando "enciende" (ajústalo a gusto: 0.10–0.20)
+  const ON  = 0.14;
+  const OFF = 0.0;
+
+  // Programamos el gain con timestamps de AudioContext para que quede super estable
+  onMarks.forEach(p  => buzzGain.gain.setValueAtTime(ON,  t0 + p  * FLICKER_PERIOD));
+  offMarks.forEach(p => buzzGain.gain.setValueAtTime(OFF, t0 + p  * FLICKER_PERIOD));
+
+  // aseguramos caída al final del ciclo
+  buzzGain.gain.setTargetAtTime(OFF, t0 + FLICKER_PERIOD, 0.01);
+}
+
+function startBuzzSync(){
+  if (!ctx) return;
+  if (!buzz) { /* por si acaso */ if (typeof setupBuzz === 'function') setupBuzz(); }
+  if (buzzTimer) return;
+
+  // programa el primer ciclo un pelín en el futuro
+  const t0 = ctx.currentTime + 0.05;
+  scheduleBuzzCycle(t0);
+
+  // reprograma en cada periodo para ir en fase con el parpadeo del botón
+  buzzTimer = setInterval(()=>{
+    scheduleBuzzCycle(ctx.currentTime);
+  }, FLICKER_PERIOD * 1000);
+}
+
+function stopBuzzSync(){
+  if (buzzTimer){ clearInterval(buzzTimer); buzzTimer = null; }
+  if (buzzGain){ buzzGain.gain.setTargetAtTime(0.0, ctx?.currentTime ?? 0, 0.03); }
+}
+
+
+  document.addEventListener('visibilitychange', ()=>{
+  if (!ctx) return;
+  if (document.hidden){
+    stopSeq();
+    stopBuzzSync(); // 👈 apaga buzz al ocultar
+  } else if (!running){
+    startSeq();
+    startBuzzSync(); // 👈 vuelve a encender al volver
+  }
+});
 
     window.__toy_spooky = {
       tempo(bpm){ stopSeq(); const beat = 60/bpm; startSeq(); },
