@@ -54,7 +54,7 @@
 
     h1{
       font-family:var(--font-title); font-size:3.5em; color:var(--accent-orange);
-      text-shadow:0 0 10px var(--accent-orange), 0 0 20px rgba(255,140,0,.5);
+      /* text-shadow:0 0 10px var(--accent-orange), 0 0 20px rgba(255,140,0,.5); */
       margin-bottom:15px; line-height:1.1; transform:scale(.9); animation:title-pop .8s ease-out forwards; font-weight:900;
     }
     @keyframes title-pop{0%{opacity:0;transform:scale(.5)}100%{opacity:1;transform:scale(1)}}
@@ -95,10 +95,10 @@
       position:absolute; font-size:3em; opacity:.5; pointer-events:none; animation:float-and-sway 15s linear infinite;
       filter:drop-shadow(0 0 5px rgba(255,255,255,.5)); z-index:9999;
     }
-    .effect-item:nth-child(1){ top:5%; left:5%; animation-duration:10s; color:var(--accent-orange); }
-    .effect-item:nth-child(2){ top:25%; right:10%; animation-duration:11s; animation-delay:3s; color:var(--accent-purple); }
-    .effect-item:nth-child(3){ bottom:6%; left:15%; animation-duration:12s; animation-delay:3s; color:var(--text-color); }
-    .effect-item:nth-child(4){ bottom:38%; left:26%; animation-duration:13s; animation-delay:3s; color:var(--text-color); }
+    .effect-item:nth-child(1){ top:5%; left:5%; animation-duration:5s; color:var(--accent-orange); }
+    .effect-item:nth-child(2){ top:25%; right:10%; animation-duration:4s; animation-delay:2s; color:var(--accent-purple); }
+    .effect-item:nth-child(3){ bottom:6%; left:15%; animation-duration:5s; animation-delay:2s; color:var(--text-color); }
+    .effect-item:nth-child(4){ bottom:38%; left:26%; animation-duration:6s; animation-delay:3s; color:var(--text-color); }
 
     /* Animaciones */
     @keyframes float-and-sway{
