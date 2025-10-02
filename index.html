@@ -7,14 +7,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Creepster&display=swap" rel="stylesheet">
   <style>
     :root{
-      --dark-bg:#1A002C; --accent-purple:#9D3CFF; --accent-orange:#FF8C00; --text-color:#E0E0E0;
+      --dark-bg:#10001D; --accent-purple:#9D3CFF; --accent-orange:#FF8C00; --text-color:#E0E0E0;
       --font-main:'Montserrat',sans-serif; --font-title:'Creepster',cursive;
     }
     body{
       font-family:var(--font-main); color:var(--text-color); background-color:var(--dark-bg);
       margin:0; padding:0; display:flex; justify-content:center; align-items:center; min-height:100vh;
       overflow:hidden; position:relative;
-      background-image:radial-gradient(#300050 40%,transparent 40%), radial-gradient(#300050 20%,transparent 20%);
+      background-image:radial-gradient(#2a0045 40%,transparent 40%), radial-gradient(#2a0045 20%,transparent 20%);
       background-size:5px 5px; background-position:0 0, 10px 10px;
     }
     #welcome-screen{
@@ -30,7 +30,7 @@
     .portal-icon{ font-size:4em; color:var(--accent-purple); animation:pulse-icon 1.5s infinite alternate; }
     .invitation-card{
       width:90%; max-width:380px; min-height:600px;
-      background:linear-gradient(145deg, rgba(26,0,44,.95) 0%, rgba(32,0,48,.9) 100%);
+      background:linear-gradient(145deg, rgba(16,0,29,.96) 0%, rgba(24,0,38,.92) 100%);
       border-radius:30px; box-shadow:0 15px 50px rgba(0,0,0,.7), 0 0 25px var(--accent-purple);
       padding:30px 20px; box-sizing:border-box; text-align:center; position:relative; z-index:50;
       opacity:0; transform:scale(.8) rotateY(-15deg); transition:opacity 1s ease-out, transform 1s ease-out;
@@ -44,8 +44,8 @@
     h2{ font-size:1.2em; font-weight:700; color:var(--accent-purple); margin:10px 0 25px; text-transform:uppercase; letter-spacing:2px; }
     p{ font-size:1em; margin:15px 0; line-height:1.5; color:var(--text-color); }
     .data-panel{
-      background-color:rgba(0,0,0,.2); border:1px solid var(--accent-purple); border-radius:10px;
-      padding:20px 10px; margin:30px 0; box-shadow:0 0 15px rgba(157,60,255,.3); text-align:left;
+      background-color:rgba(0,0,0,.23); border:1px solid var(--accent-purple); border-radius:10px;
+      padding:20px 10px; margin:30px 0; box-shadow:0 0 15px rgba(157,60,255,.25); text-align:left;
     }
     .data-panel p{ display:flex; justify-content:space-between; align-items:center; padding:5px 15px;
       border-bottom:1px dashed rgba(255,255,255,.1); font-weight:700; }
@@ -112,7 +112,7 @@
 
   <script>
     /* =========================
-       CONFIG MAPA
+       MAPA
        ========================= */
     const LATITUD = 25.757046;
     const LONGITUD = -109.023735;
@@ -123,262 +123,261 @@
         ? `http://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(label)}&z=15`
         : `https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place_id=${encodeURIComponent(label)}`;
     }
-    const mapLink = document.getElementById('map-link');
-    mapLink.href = createMapLink(LATITUD, LONGITUD, LUGAR_FIESTA);
+    document.getElementById('map-link').href = createMapLink(LATITUD, LONGITUD, LUGAR_FIESTA);
+  </script>
 
-    /* =========================
-       WEB AUDIO: NEÓN + PASOS
-       ========================= */
-    let ctx, master, limiter;
-    let neonGate, neonHumGain, crackleTimer, gateTimer, stepsTimer;
-    let running = false;
+  <!-- ===========================================
+       AUDIO: "Toybox Spooky Waltz" (original)
+       =========================================== -->
+  <script>
+  (() => {
+    const welcomeScreen = document.getElementById('welcome-screen');
+    const invitationCardContent = document.getElementById('invitation-card-content');
+    if (!welcomeScreen || !invitationCardContent) return;
 
-    // ⬇️ Ajustes rápidos
-    const HUM_BASE = 60;          // 60 Hz (zumbido eléctrico)
-    const HUM_LEVEL = 0.14;       // volumen base del zumbido
-    const GATE_MIN = 0.25;        // ganancia mínima del parpadeo (neón)
-    const GATE_MAX = 0.95;        // ganancia máxima del parpadeo
-    const GATE_RATE_MS = [25, 45]; // intervalo aleatorio entre cambios (ms) => parpadeo rápido
-    const CRACKLE_EVERY_MS = [120, 420]; // aleatorio entre chispazos
-    const CRACKLE_DUR = [0.012, 0.045];  // duración de chispazos (12–45 ms)
-    const CRACKLE_HP = 2800;      // filtro paso alto para chispa
+    let ctx, master, bus, limiter, delayA, delayB, darkLP;
+    let running = false, step = 0, schedId = null, fxTimer = null;
 
-    // Pasos:
-    const STEPS_TRIGGER_EVERY = 2000; // disparar patrón cada 2 s
-    const STEPS_PATTERN_DUR = 3.0;    // el patrón dura 3 s
-    const STEP_SPACING = 0.6;         // separación entre pisadas
-    const STEP_COUNT = Math.floor(STEPS_PATTERN_DUR / STEP_SPACING); // nº pisadas en patrón
+    /* ---------- Parámetros musicales ---------- */
+    const BPM = 132;               // vals vivo (3/4)
+    const BEAT = 60 / BPM;         // negra
+    const STEP = BEAT / 2;         // corchea (programación fina)
+    const ROOT = 61;               // C#3
+    const SCALE = [0,2,3,5,7,8,10]; // menor natural con ♭6 vibe Halloween
+    const GLIDE = 0.045;
 
-    function rand(min, max){ return Math.random()*(max-min)+min; }
-    function choice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+    // Envolventes
+    const BASS_ENV  = {a:0.008,d:0.10,s:0.6,r:0.18};
+    const LEAD_ENV  = {a:0.015,d:0.11,s:0.55,r:0.25};
+    const GLOCK_ENV = {a:0.001,d:0.10,s:0.0,r:0.9};
 
-    function initAudio(){
+    // Bajo "oom-pah-pah" (3/4) + colores ♭VI / v (6 compases)
+    const bassRootDeg = [0,0,0, 0,0,0];
+    const chordDegrees = [
+      [0,3,7],
+      [5,8,12],
+      [7,10,14],
+      [0,3,7],
+      [8,10,15],
+      [7,10,14]
+    ];
+
+    // Melodía original (no copia), 16 1/16 por compás × 6 compases
+    const melody16ths = [
+      0, 2, 3, 5,  3, 2, 0, -1,  0, 2, 5, 7,  5, 3, 2, 0,
+      0, 2, 3, 5,  8, 7, 5, 3,   2, 3, 5, 7,  8, 7, 5, 3,
+      0, 2, 3, 5,  3, 2, 0, -1,  0, 3, 5, 7,  10, 8, 7, 5,
+      0, 2, 5, 7,  5, 3, 2, 0,  -1, 0, 2, 3,   2, 0, -1, -3,
+      8, 7, 5, 3,  0, 2, 3, 5,   7, 8, 10, 8,  7, 5, 3, 2,
+      0, 2, 3, 5,  3, 2, 0, -1,  0, 2, 5, 7,  5, 3, 2, 0
+    ];
+
+    /* ---------- Utils ---------- */
+    const mtof = m => 440 * Math.pow(2, (m-69)/12);
+    const gain = v => { const g = ctx.createGain(); g.gain.value = v ?? 0; return g; };
+    const env  = (node, t0, e, peak=1, sus=0.6) => {
+      node.gain.cancelScheduledValues(t0);
+      node.gain.setValueAtTime(0.0001, t0);
+      node.gain.linearRampToValueAtTime(peak, t0 + e.a);
+      node.gain.linearRampToValueAtTime(peak*sus, t0 + e.a + e.d);
+    };
+
+    /* ---------- Audio graph ---------- */
+    function init(){
       if (ctx) return;
       ctx = new (window.AudioContext || window.webkitAudioContext)();
 
-      // Master
-      master = ctx.createGain();
-      master.gain.setValueAtTime(0.8, ctx.currentTime);
+      master = gain(0.85);
+      bus    = gain(0.9);
+
+      // Ping-pong retro + filtro suave
+      delayA = ctx.createDelay(0.8); delayA.delayTime.value = 0.28;
+      delayB = ctx.createDelay(0.8); delayB.delayTime.value = 0.37;
+      const fbA = gain(0.28), fbB = gain(0.25);
+      const panL = new StereoPannerNode(ctx,{pan:-0.18});
+      const panR = new StereoPannerNode(ctx,{pan: 0.18});
+      bus.connect(panL).connect(delayA).connect(fbA).connect(delayA);
+      bus.connect(panR).connect(delayB).connect(fbB).connect(delayB);
+
+      darkLP = ctx.createBiquadFilter(); darkLP.type='lowpass'; darkLP.frequency.value = 5600;
+      delayA.connect(darkLP); delayB.connect(darkLP); darkLP.connect(master);
 
       limiter = ctx.createDynamicsCompressor();
-      limiter.threshold.value = -14;
-      limiter.knee.value = 20;
-      limiter.ratio.value = 12;
-      limiter.attack.value = 0.003;
-      limiter.release.value = 0.15;
-
+      limiter.threshold.value=-12; limiter.knee.value=18; limiter.ratio.value=8;
+      limiter.attack.value=0.003; limiter.release.value=0.2;
       master.connect(limiter).connect(ctx.destination);
+    }
 
-      // Puerta/compresor para simular parpadeo global (control de neon)
-      neonGate = ctx.createGain();
-      neonGate.gain.value = 0.0;
-      neonGate.connect(master);
-
-      // Zumbido base (armónicos 60/120/180 Hz)
-      neonHumGain = ctx.createGain();
-      neonHumGain.gain.value = HUM_LEVEL;
-      neonHumGain.connect(neonGate);
-
-      [1,2,3].forEach(mult=>{
+    /* ---------- Instrumentos ---------- */
+    function playBass(time, midi, vol=0.36){
+      const osc = ctx.createOscillator(); osc.type='triangle';
+      const g  = gain(0); const p = new StereoPannerNode(ctx,{pan:-0.05});
+      osc.frequency.setValueAtTime(mtof(midi), time);
+      env(g, time, BASS_ENV, vol, 0.7);
+      g.gain.setTargetAtTime(0.0001, time + BEAT*0.9, BASS_ENV.r);
+      osc.connect(g).connect(p).connect(bus);
+      osc.start(time); osc.stop(time + BEAT + 0.1);
+    }
+    function playChordStab(time, chordMidis, vol=0.18){
+      chordMidis.forEach((m, i)=>{
         const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        gain.gain.value = 0.22 / mult; // armónicos decrecientes
-        osc.type = (mult === 1) ? 'sawtooth' : 'square';
-        osc.frequency.value = HUM_BASE * mult;
-        // Ligerísima inestabilidad de frecuencia (jitter)
-        setInterval(()=>{
-          const now = ctx.currentTime;
-          osc.frequency.linearRampToValueAtTime(HUM_BASE*mult*(1+rand(-0.002,0.002)), now + 0.08);
-        }, 120);
-        osc.connect(gain).connect(neonHumGain);
-        osc.start();
+        osc.type = (i%2===0) ? 'sawtooth' : 'square';
+        const g  = gain(0); const p = new StereoPannerNode(ctx,{pan: i%2===0 ? 0.08 : -0.08});
+        const vcf= ctx.createBiquadFilter(); vcf.type='lowpass'; vcf.frequency.value = 1400;
+        osc.frequency.setValueAtTime(mtof(m), time);
+        env(g, time, {a:0.01,d:0.15,s:0.5,r:0.2}, vol, 0.5);
+        g.gain.setTargetAtTime(0.0001, time + BEAT*0.8, 0.12);
+        osc.connect(g).connect(vcf).connect(p).connect(bus);
+        osc.start(time); osc.stop(time + BEAT + 0.1);
       });
-
-      startNeonFlicker();
-      startCrackles();
-      startStepsLoop();
     }
-
-    // ---------- PARPADEO (gate) ----------
-    function startNeonFlicker(){
-      if (gateTimer) return;
-      const apply = ()=>{
-        const g = rand(GATE_MIN, GATE_MAX);
-        const t = ctx.currentTime;
-        neonGate.gain.cancelScheduledValues(t);
-        neonGate.gain.setTargetAtTime(g, t, 0.015);
-        const next = rand(GATE_RATE_MS[0], GATE_RATE_MS[1]);
-        gateTimer = setTimeout(apply, next);
-      };
-      apply();
+    function playGlock(time, midi, vol=0.22){
+      const s1 = ctx.createOscillator(); s1.type='sine';
+      const s2 = ctx.createOscillator(); s2.type='sine';
+      const g  = gain(0); const hp = ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=180;
+      s1.frequency.setValueAtTime(mtof(midi), time);
+      s2.frequency.setValueAtTime(mtof(midi)*2.01, time);
+      env(g, time, GLOCK_ENV, vol, 0.0);
+      g.gain.exponentialRampToValueAtTime(0.0001, time + 1.1);
+      s1.connect(hp).connect(g).connect(bus);
+      s2.connect(hp).connect(g).connect(bus);
+      s1.start(time); s2.start(time);
+      s1.stop(time+1.2); s2.stop(time+1.2);
     }
-    function stopNeonFlicker(){ if (gateTimer){ clearTimeout(gateTimer); gateTimer=null; } }
-
-    // ---------- CHISPAZOS ----------
-    function noiseBuffer(){
-      const len = Math.floor(ctx.sampleRate * 0.1);
-      const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i=0; i<len; i++){ data[i] = (Math.random()*2-1) * (1 - i/len); } // pequeña caída
-      return buf;
-    }
-    const _noiseBufCache = { buf:null };
-    function crackle(){
-      if (!_noiseBufCache.buf) _noiseBufCache.buf = noiseBuffer();
-      const src = ctx.createBufferSource();
-      src.buffer = _noiseBufCache.buf;
-      const hp = ctx.createBiquadFilter();
-      hp.type = 'highpass';
-      hp.frequency.value = CRACKLE_HP;
-      hp.Q.value = 0.7;
-
-      const g = ctx.createGain();
-      const now = ctx.currentTime;
-      const dur = rand(CRACKLE_DUR[0], CRACKLE_DUR[1]);
-
-      g.gain.setValueAtTime(0, now);
-      g.gain.linearRampToValueAtTime(rand(0.2,0.55), now + 0.002);
-      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
-
-      src.connect(hp).connect(g).connect(neonGate);
-      src.start(now);
-      src.stop(now + dur + 0.02);
-    }
-    function startCrackles(){
-      if (crackleTimer) return;
-      const loop = ()=>{
-        crackle();
-        const next = rand(CRACKLE_EVERY_MS[0], CRACKLE_EVERY_MS[1]);
-        crackleTimer = setTimeout(loop, next);
-      };
-      loop();
-    }
-    function stopCrackles(){ if (crackleTimer){ clearTimeout(crackleTimer); crackleTimer=null; } }
-
-    // ---------- PASOS ----------
-    function playStep(atTime, panVal=0){
-      // Golpe grave (talón)
-      const kickOsc = ctx.createOscillator();
-      kickOsc.type = 'sine';
-      kickOsc.frequency.setValueAtTime(120, atTime);
-      kickOsc.frequency.exponentialRampToValueAtTime(55, atTime + 0.12);
-
-      const kickGain = ctx.createGain();
-      kickGain.gain.setValueAtTime(0.0001, atTime);
-      kickGain.gain.exponentialRampToValueAtTime(0.85, atTime + 0.01);
-      kickGain.gain.exponentialRampToValueAtTime(0.0001, atTime + 0.22);
-
-      // Frota/ropa (ruido filtrado)
-      if (!_noiseBufCache.buf) _noiseBufCache.buf = noiseBuffer();
-      const src = ctx.createBufferSource();
-      src.buffer = _noiseBufCache.buf;
-
-      const bp = ctx.createBiquadFilter();
-      bp.type = 'bandpass';
-      bp.frequency.value = 2200;
-      bp.Q.value = 2.5;
-
-      const noiseGain = ctx.createGain();
-      noiseGain.gain.setValueAtTime(0.0001, atTime);
-      noiseGain.gain.linearRampToValueAtTime(0.25, atTime + 0.02);
-      noiseGain.gain.exponentialRampToValueAtTime(0.0001, atTime + 0.15);
-
-      const pan = new StereoPannerNode(ctx, { pan: panVal });
-
-      kickOsc.connect(kickGain).connect(pan).connect(master);
-      src.connect(bp).connect(noiseGain).connect(pan).connect(master);
-
-      kickOsc.start(atTime);
-      kickOsc.stop(atTime + 0.25);
-
-      src.start(atTime);
-      src.stop(atTime + 0.2);
-    }
-
-    function scheduleFootsteps(startAt, durSec){
-      // Alterna izquierda/derecha, ligeras variaciones
-      for (let i=0; i<STEP_COUNT; i++){
-        const t = startAt + i*STEP_SPACING + rand(-0.03, 0.03);
-        const pan = (i % 2 === 0) ? -0.18 : 0.18;
-        playStep(t, pan + rand(-0.05, 0.05));
+    function playLead(time, midi, vol=0.28){
+      const o = ctx.createOscillator(); o.type='square';
+      const g = gain(0); const vcf = ctx.createBiquadFilter(); vcf.type='lowpass'; vcf.frequency.value=1500;
+      const p = new StereoPannerNode(ctx,{pan:0.06});
+      if (playLead.lastFreq){
+        o.frequency.setValueAtTime(playLead.lastFreq, time);
+        o.frequency.exponentialRampToValueAtTime(mtof(midi), time + GLIDE);
+      } else {
+        o.frequency.setValueAtTime(mtof(midi), time);
       }
+      playLead.lastFreq = mtof(midi);
+      env(g, time, LEAD_ENV, vol, LEAD_ENV.s);
+      const len = STEP*0.95;
+      g.gain.setTargetAtTime(0.0001, time + len, LEAD_ENV.r);
+      o.connect(g).connect(vcf).connect(p).connect(bus);
+      o.start(time); o.stop(time + len + LEAD_ENV.r + 0.05);
+    }
+    function playTheremin(time, startMidi, endMidi, dur=1.8, vol=0.18){
+      const o = ctx.createOscillator(); o.type='sine';
+      const g = gain(0); const p = new StereoPannerNode(ctx,{pan:0.1});
+      env(g, time, {a:0.2,d:0.2,s:0.7,r:0.5}, vol, 0.7);
+      o.frequency.setValueAtTime(mtof(startMidi), time);
+      o.frequency.linearRampToValueAtTime(mtof(endMidi), time + dur*0.7);
+      g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+      o.connect(g).connect(p).connect(bus);
+      o.start(time); o.stop(time + dur + 0.1);
     }
 
-    function startStepsLoop(){
-      if (stepsTimer) return;
-      const tick = ()=>{
-        const t0 = ctx.currentTime + 0.05;
-        scheduleFootsteps(t0, STEPS_PATTERN_DUR);
-        stepsTimer = setTimeout(tick, STEPS_TRIGGER_EVERY);
+    /* ---------- Secuenciador (6 compases en bucle) ---------- */
+    function startSeq(){
+      if (running) return; running = true;
+      let next = ctx.currentTime + 0.06;
+      const lookAhead = 0.1, horizon = 0.25;
+
+      function loop(){
+        while (next < ctx.currentTime + horizon){
+          const sixBarLen = 6;
+          const bar = Math.floor((step * STEP) / (BEAT*3)) % sixBarLen; // 3/4
+          const posInBar = ((step * STEP) % (BEAT*3)) / BEAT;           // en negras
+
+          // 1: bajo
+          if (Math.abs(posInBar - 0) < 0.001){
+            const deg = bassRootDeg[bar];
+            const rootMidi = ROOT + SCALE[(deg % SCALE.length + SCALE.length) % SCALE.length];
+            playBass(next, rootMidi);
+          }
+          // 2 y 3: stabs de acorde
+          if (Math.abs(posInBar - 1) < 0.001 || Math.abs(posInBar - 2) < 0.001){
+            const chord = chordDegrees[bar].map(d => ROOT + d);
+            playChordStab(next, chord);
+          }
+          // Glockenspiel (motivo)
+          if (step % 2 === 0){
+            const idx = (bar*16) + ((step/2)%16|0);
+            const degOff = melody16ths[idx % melody16ths.length];
+            const scaleIdx = ((degOff % SCALE.length) + SCALE.length) % SCALE.length;
+            const midi = (ROOT + 12) + SCALE[scaleIdx];
+            playGlock(next, midi);
+          }
+          // Lead a contratiempo
+          if ([0.5, 1.5, 2.5].some(v => Math.abs(posInBar - v) < 0.001)){
+            const idx = (bar*16) + ((step)%16);
+            const degOff = melody16ths[idx % melody16ths.length] + (bar===4 ? 2 : 0);
+            const scaleIdx = ((degOff % SCALE.length) + SCALE.length) % SCALE.length;
+            const midi = (ROOT + 12) + SCALE[scaleIdx];
+            playLead(next, midi);
+          }
+          // Theremin en compás 3 y 6
+          if (Math.abs(posInBar - 0) < 0.001 && (bar === 2 || bar === 5)){
+            playTheremin(next + 0.05, ROOT+SCALE[0]+12, ROOT+SCALE[3]+19, 1.6, 0.14);
+          }
+
+          next += STEP;
+          step++;
+        }
+        schedId = setTimeout(loop, lookAhead*1000);
+      }
+      loop();
+
+      // FX tipo “music box” cada ~9–14 s
+      const fxLoop = () => {
+        const t = ctx.currentTime + 0.2;
+        [0,3,7,12].forEach((d,i)=>{ playGlock(t + i*0.12, ROOT + d + 24, 0.18); });
+        fxTimer = setTimeout(fxLoop, 9000 + Math.random()*5000);
       };
-      tick();
+      fxLoop();
     }
-    function stopStepsLoop(){ if (stepsTimer){ clearTimeout(stepsTimer); stepsTimer=null; } }
 
-    // ---------- CONTROL ----------
-    function startSoundscape(){
-      if (running) return;
-      running = true;
-      initAudio();
-    }
-    function stopSoundscape(){
+    function stopSeq(){
       running = false;
-      stopNeonFlicker(); stopCrackles(); stopStepsLoop();
+      if (schedId){ clearTimeout(schedId); schedId = null; }
+      if (fxTimer){ clearTimeout(fxTimer); fxTimer = null; }
+      step = 0;
     }
 
-    // ---------- UI ----------
-    const welcomeScreen = document.getElementById('welcome-screen');
-    const invitationCardContent = document.getElementById('invitation-card-content');
-
-    welcomeScreen.addEventListener('click', async () => {
-      // Transición UI
+    /* ---------- UI / Inicio ---------- */
+    welcomeScreen.addEventListener('click', async ()=>{
+      // Transición visual original
       welcomeScreen.style.opacity = '0';
       invitationCardContent.classList.add('show-card');
       setTimeout(()=>welcomeScreen.style.display='none', 500);
 
       // Audio
-      if (!ctx) initAudio();
+      if (!ctx) init();
       try{ await ctx.resume(); }catch(e){}
-      startSoundscape();
-      // Impacto breve al abrir
-      playPortalHit();
-    });
+      startSeq();
+      portalHit();
+    }, { passive:true });
 
-    // Impacto de apertura (breve)
-    function playPortalHit(){
-      const t0 = ctx.currentTime + 0.02;
-      const osc = ctx.createOscillator();
-      const amp = ctx.createGain();
-      const bp = ctx.createBiquadFilter();
-      bp.type = 'bandpass';
-      bp.frequency.setValueAtTime(700, t0);
-      bp.Q.value = 3;
-
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(240, t0);
-      osc.frequency.exponentialRampToValueAtTime(70, t0 + 0.28);
-
-      amp.gain.setValueAtTime(0, t0);
-      amp.gain.linearRampToValueAtTime(0.8, t0 + 0.02);
-      amp.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.35);
-
-      osc.connect(bp).connect(amp).connect(master);
-      osc.start(t0);
-      osc.stop(t0 + 0.38);
+    // Impacto breve al abrir (igual que en tu versión)
+    function portalHit(){
+      const t = ctx.currentTime + 0.02;
+      const o = ctx.createOscillator(); o.type='square';
+      const a = gain(0); const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=600; bp.Q.value=2.2;
+      o.frequency.setValueAtTime(200,t); o.frequency.exponentialRampToValueAtTime(70,t+0.3);
+      env(a,t,{a:0.01,d:0.07,s:0,r:0.28},0.7,0); a.gain.exponentialRampToValueAtTime(0.0001,t+0.34);
+      o.connect(bp).connect(a).connect(bus); o.start(t); o.stop(t+0.36);
     }
 
-    // Ahorro de batería / foco
+    // Ahorro de batería
     document.addEventListener('visibilitychange', ()=>{
       if (!ctx) return;
-      if (document.hidden){ stopSoundscape(); }
-      else if (!running){ startSoundscape(); }
+      if (document.hidden){ stopSeq(); }
+      else if (!running){ startSeq(); }
     });
 
-    // Exponer knobs rápidos en consola
-    window.__neon = {
-      setHumLevel:(v)=>{ if (neonHumGain) neonHumGain.gain.setTargetAtTime(v, ctx.currentTime, 0.05); },
-      setGate:(min,max)=>{ window.GATE_MIN=min; window.GATE_MAX=max; }, // visual; cambia alcance del parpadeo
+    // Controles por consola (opcionales)
+    window.__toy_spooky = {
+      tempo(bpm){ stopSeq(); const beat = 60/bpm; /* re-usa BPM dinámicamente */ startSeq(); },
+      dark(hz){ darkLP && darkLP.frequency.setTargetAtTime(hz, ctx.currentTime, .3); }, // 3k–7k
+      wet(v){ bus && bus.gain.setTargetAtTime(v, ctx.currentTime, .2); },               // 0..1
+      master(v){ master && (master.gain.value=v); }
     };
+  })();
   </script>
 </body>
 </html>
