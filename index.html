@@ -8,7 +8,7 @@
   <style>
     :root{
       --dark-bg:#10001D; --accent-purple:#9D3CFF; --accent-orange:#FF8C00; --accent-purple:#9D3CFF;
---text-color:#E0E0E0;
+      --text-color:#E0E0E0;
       --font-main:'Montserrat',sans-serif; --font-title:'Creepster',cursive;
     }
     body{
@@ -24,14 +24,13 @@
       cursor:pointer; transition:opacity .5s ease-out;
     }
     .portal-text{
-  font-family:var(--font-title);
-  font-size:3em;
-  font-weight:700;
-  color:var(--accent-orange);
-  margin-bottom:20px;
-  line-height:1.1;
-}
-    /* Imagen de bienvenida */
+      font-family:var(--font-title);
+      font-size:3em;
+      font-weight:700;
+      color:var(--accent-orange);
+      margin-bottom:20px;
+      line-height:1.1;
+    }
     .portal-img{
       max-width:280px;
       width:80%;
@@ -41,37 +40,36 @@
       filter:drop-shadow(0 0 20px rgba(255,140,0,.6));
     }
 
-    /* Tarjeta: ahora con imagen de fondo + filtro sombrío */
-  .invitation-card{
-  width:90%; max-width:380px; min-height:600px;
-  background: 
-    linear-gradient(145deg, rgba(0,0,0,0.70), rgba(0,0,0,0.70)),
-    url('woodyterr.webp'),
-    url('background1.webp');
-  background-size: cover, cover, cover;
-  background-position: center, center, center;
-  background-repeat: no-repeat, no-repeat, no-repeat;
-  border-radius:30px;
-  box-shadow:0 15px 50px rgba(0,0,0,.7), 0 0 25px var(--accent-purple);
-  padding:30px 20px;
-  box-sizing:border-box;
-  text-align:center;
-  position:relative;
-  z-index:50;
-  opacity:0;
-  transform:scale(.8) rotateY(-15deg);
-  transition:opacity 1s ease-out, transform 1s ease-out;
-}
+    /* Tarjeta con doble imagen de fondo + filtro sombrío */
+    .invitation-card{
+      width:90%; max-width:380px; min-height:600px;
+      background:
+        linear-gradient(145deg, rgba(0,0,0,0.70), rgba(0,0,0,0.70)),
+        url('woodyterr.webp'),
+        url('background1.webp');
+      background-size: cover, cover, cover;
+      background-position: center, center, center;
+      background-repeat: no-repeat, no-repeat, no-repeat;
+      border-radius:30px;
+      box-shadow:0 15px 50px rgba(0,0,0,.7), 0 0 25px var(--accent-purple);
+      padding:30px 20px;
+      box-sizing:border-box;
+      text-align:center;
+      position:relative;
+      z-index:50;
+      opacity:0;
+      transform:scale(.8) rotateY(-15deg);
+      transition:opacity 1s ease-out, transform 1s ease-out;
+    }
 
-  .neon-flicker {
-  font-weight:700;
-  color:var(--accent-purple);
-  animation:flicker-purple 1.5s infinite alternate;
-}
+    .neon-flicker {
+      font-weight:700;
+      color:var(--accent-purple);
+      animation:flicker-purple 1.5s infinite alternate;
+    }
 
     h1{
       font-family:var(--font-title); font-size:3.5em; color:var(--accent-orange);
-      /* text-shadow:0 0 10px var(--accent-orange), 0 0 20px rgba(255,140,0,.5); */
       margin-bottom:15px; line-height:1.1; transform:scale(.9); animation:title-pop .8s ease-out forwards; font-weight:900;
     }
     @keyframes title-pop{0%{opacity:0;transform:scale(.5)}100%{opacity:1;transform:scale(1)}}
@@ -88,24 +86,22 @@
     .data-panel span{ font-weight:900; color:var(--accent-orange); text-shadow:0 0 5px rgba(255,140,0,.5); }
 
     .location-button{
-  display:block;
-  margin:30px auto;
-  padding:18px 30px;
-  background:var(--accent-orange); /* 👈 ya naranja */
-  color:#fff;
-  text-decoration:none;
-  font-weight:900;
-  border-radius:50px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  transition:all .3s ease;
-  position:relative;
-  overflow:hidden;
-  border:none;
-
-  animation:button-flicker 1.5s infinite alternate; /* 👈 parpadeo neón */
-}
-
+      display:block;
+      margin:30px auto;
+      padding:18px 30px;
+      background:var(--accent-orange);
+      color:#fff;
+      text-decoration:none;
+      font-weight:900;
+      border-radius:50px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      transition:all .3s ease;
+      position:relative;
+      overflow:hidden;
+      border:none;
+      animation:button-flicker 1.5s infinite alternate;
+    }
     .location-button:hover{ background:var(--accent-orange); color:#fff; box-shadow:0 0 25px var(--accent-orange); transform:scale(1.05); }
 
     .effect-item{
@@ -113,11 +109,7 @@
       filter:drop-shadow(0 0 5px rgba(255,255,255,.5)); z-index:9999;
     }
     .effect-item:nth-child(1){ bottom:38%; left:26%; animation-duration:7s; color:var(--accent-orange); }
-   /* .effect-item:nth-child(2){ top:25%; right:10%; animation-duration:7s; animation-delay:2s; color:var(--accent-purple); }
-    .effect-item:nth-child(3){ bottom:6%; left:15%; animation-duration:9s; animation-delay:3s; color:var(--text-color); }
-    .effect-item:nth-child(4){ bottom:38%; left:26%; animation-duration:11s; animation-delay:4s; color:var(--text-color); }
-*/
-    /* Animaciones */
+
     @keyframes float-and-sway{
       0%{transform:translate(0,0) rotate(0deg); opacity:0}
       20%{opacity:.7}
@@ -126,76 +118,67 @@
       100%{transform:translate(0,0) rotate(0deg); opacity:0}
     }
 
-@keyframes flicker-purple {
-  0%,18%,22%,25%,53%,57%,100% {
-    opacity:1;
-    text-shadow:
-      0 0 8px rgba(157,60,255,0.9),
-      0 0 16px rgba(157,60,255,0.7),
-      0 0 28px rgba(157,60,255,0.5);
-  }
-  20%,24%,55% {
-    opacity:.6;
-    text-shadow:none;
-  }
-}
-    
-    @keyframes flicker{
-      0%,18%,22%,25%,53%,57%,100%{opacity:1; text-shadow:0 0 8px rgba(255,140,0,.7), 0 0 15px rgba(255,140,0,.5)}
-      20%,24%,55%{opacity:.6; text-shadow:none}
+    @keyframes flicker-purple {
+      0%,18%,22%,25%,53%,57%,100% {
+        opacity:1;
+        text-shadow:
+          0 0 8px rgba(157,60,255,0.9),
+          0 0 16px rgba(157,60,255,0.7),
+          0 0 28px rgba(157,60,255,0.5);
+      }
+      20%,24%,55% {
+        opacity:.6;
+        text-shadow:none;
+      }
     }
 
     @keyframes button-flicker {
-  0%, 18%, 22%, 25%, 53%, 57%, 100% {
-    box-shadow:
-      0 0 8px rgba(255,140,0,0.9),
-      0 0 16px rgba(255,140,0,0.7),
-      0 0 28px rgba(255,140,0,0.5);
-    background: var(--accent-orange);
-  }
-  20%, 24%, 55% {
-    box-shadow: none;
-    background: rgba(255,140,0,0.6); /* tono más apagado */
-  }
-}
+      0%, 18%, 22%, 25%, 53%, 57%, 100% {
+        box-shadow:
+          0 0 8px rgba(255,140,0,0.9),
+          0 0 16px rgba(255,140,0,0.7),
+          0 0 28px rgba(255,140,0,0.5);
+        background: var(--accent-orange);
+      }
+      20%, 24%, 55% {
+        box-shadow: none;
+        background: rgba(255,140,0,0.6);
+      }
+    }
 
-    @keyframes pulse-icon{0%{transform:scale(1)}100%{transform:scale(1.1)}}
     .show-card{ opacity:1 !important; transform:scale(1) rotateY(0deg) !important; }
 
     /* Tamaño de las PNG dentro de los spans de efecto */
     .effect-item img{
-      width: 1.8em;   /* ~3em reales porque el span usa font-size:3em */
+      width: 1.8em;
       height: 1.8em;
       display: block;
       object-fit: contain;
       pointer-events: none;
     }
-/* Rotar solo el tercer icono (iconpic3.png) */
-.effect-item:nth-of-type(1) img {
-  transform: rotate(10deg);
-}
-/* Rotar solo el tercer icono (iconpic3.png) */
-.effect-item:nth-of-type(4) img {
-  transform: rotate(15deg);
-}
+    /* Rota iconos específicos si los usas */
+    .effect-item:nth-of-type(1) img { transform: rotate(10deg); }
+    .effect-item:nth-of-type(4) img { transform: rotate(15deg); }
 
+    /* Botón de mute (opcional, discreto) */
+    .audio-toggle{
+      position:fixed; right:14px; bottom:14px; z-index:1200;
+      background:rgba(0,0,0,.55); color:#fff; border:1px solid rgba(255,255,255,.2);
+      padding:10px 14px; border-radius:999px; font-size:.85em; cursor:pointer;
+      backdrop-filter: blur(6px);
+    }
   </style>
 </head>
 <body>
   <div id="welcome-screen">
     <h1 class="portal-text">HUGO TURNS 4!</h1>
-<!--    <p>¿Están listos?...</p> -->
-    <!-- Imagen de bienvenida -->
     <img src="happyhw1.webp" alt="Happy Halloween" class="portal-img">
     <p class="small-instruction neon-flicker" style="margin-top:50px;">Toca la pantalla...</p>
   </div>
 
   <!-- Tarjeta -->
   <div class="invitation-card" id="invitation-card-content">
-    <!-- Íconos flotantes en PNG -->
-    <!-- <span class="effect-item"><img src="iconpic4.webp" alt=""></span> 
-    <span class="effect-item"><img src="iconpic2.webp" alt=""></span>
-    <span class="effect-item"><img src="iconpic3.webp" alt=""></span> -->
+    <!-- Ícono flotante de ejemplo -->
     <span class="effect-item"><img src="iconpic1.webp" alt=""></span>
 
     <h1 class="portal-text">HUGO TURNS 4!</h1>
@@ -213,6 +196,10 @@
     <p style="font-size:.9em; color:var(--accent-purple);">Buuu!</p>
   </div>
 
+  <!-- AUDIO: usa tu archivo local HalloweenWaltzz.mp3 -->
+  <audio id="bgm" src="HalloweenWaltzz.mp3" preload="auto" loop></audio>
+  <button id="audio-toggle" class="audio-toggle" aria-pressed="false" title="Silenciar/Activar audio">🔊 Sonido</button>
+
   <script>
     /* =========================
        MAPA
@@ -227,374 +214,75 @@
         : `https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place_id=${encodeURIComponent(label)}`;
     }
     document.getElementById('map-link').href = createMapLink(LATITUD, LONGITUD, LUGAR_FIESTA);
-  </script>
 
-  <!-- ===========================================
-       AUDIO: "Toybox Spooky Waltz" (original)
-       =========================================== -->
-  <script>
-  (() => {
+    /* =========================
+       AUDIO DE FONDO (MP3)
+       ========================= */
     const welcomeScreen = document.getElementById('welcome-screen');
     const invitationCardContent = document.getElementById('invitation-card-content');
-    if (!welcomeScreen || !invitationCardContent) return;
+    const bgm = document.getElementById('bgm');
+    const toggleBtn = document.getElementById('audio-toggle');
 
-    let buzz, buzzGain, buzzFilter, buzzTimer = null;
-    const FLICKER_PERIOD = 1.5; // igual que tu animación del botón
+    // Volumen inicial moderado
+    bgm.volume = 0.85;
 
-    let humOscs = [], humGain;        // zumbido 60 Hz + armónicos
-let sizzleNoise, sizzleGain;       // sizzle alto
-
-    let ctx, master, bus, limiter, delayA, delayB, darkLP;
-    let running = false, step = 0, schedId = null, fxTimer = null;
-
-    /* ---------- Parámetros musicales ---------- */
-    const BPM = 132;               // vals vivo (3/4)
-    const BEAT = 60 / BPM;         // negra
-    const STEP = BEAT / 2;         // corchea
-    const ROOT = 61;               // C#3
-    const SCALE = [0,2,3,5,7,8,10];
-    const GLIDE = 0.045;
-
-    const BASS_ENV  = {a:0.008,d:0.10,s:0.6,r:0.18};
-    const LEAD_ENV  = {a:0.015,d:0.11,s:0.55,r:0.25};
-    const GLOCK_ENV = {a:0.001,d:0.10,s:0.0,r:0.9};
-
-    const bassRootDeg = [0,0,0, 0,0,0];
-    const chordDegrees = [
-      [0,3,7],[5,8,12],[7,10,14],
-      [0,3,7],[8,10,15],[7,10,14]
-    ];
-
-    const melody16ths = [
-      0, 2, 3, 5,  3, 2, 0, -1,  0, 2, 5, 7,  5, 3, 2, 0,
-      0, 2, 3, 5,  8, 7, 5, 3,   2, 3, 5, 7,  8, 7, 5, 3,
-      0, 2, 3, 5,  3, 2, 0, -1,  0, 3, 5, 7,  10, 8, 7, 5,
-      0, 2, 5, 7,  5, 3, 2, 0,  -1, 0, 2, 3,   2, 0, -1, -3,
-      8, 7, 5, 3,  0, 2, 3, 5,   7, 8, 10, 8,  7, 5, 3, 2,
-      0, 2, 3, 5,  3, 2, 0, -1,  0, 2, 5, 7,  5, 3, 2, 0
-    ];
-
-    const mtof = m => 440 * Math.pow(2, (m-69)/12);
-    const gain = v => { const g = ctx.createGain(); g.gain.value = v ?? 0; return g; };
-    const env  = (node, t0, e, peak=1, sus=0.6) => {
-      node.gain.cancelScheduledValues(t0);
-      node.gain.setValueAtTime(0.0001, t0);
-      node.gain.linearRampToValueAtTime(peak, t0 + e.a);
-      node.gain.linearRampToValueAtTime(peak*sus, t0 + e.a + e.d);
-    };
-
-    function init(){
-      if (ctx) return;
-      ctx = new (window.AudioContext || window.webkitAudioContext)();
-      master = gain(0.85);
-      bus    = gain(0.9);
-
-      delayA = ctx.createDelay(0.8); delayA.delayTime.value = 0.28;
-      delayB = ctx.createDelay(0.8); delayB.delayTime.value = 0.37;
-      const fbA = gain(0.28), fbB = gain(0.25);
-      const panL = new StereoPannerNode(ctx,{pan:-0.18});
-      const panR = new StereoPannerNode(ctx,{pan: 0.18});
-      bus.connect(panL).connect(delayA).connect(fbA).connect(delayA);
-      bus.connect(panR).connect(delayB).connect(fbB).connect(delayB);
-
-      darkLP = ctx.createBiquadFilter(); darkLP.type='lowpass'; darkLP.frequency.value = 5600;
-      delayA.connect(darkLP); delayB.connect(darkLP); darkLP.connect(master);
-
-      limiter = ctx.createDynamicsCompressor();
-      limiter.threshold.value=-12; limiter.knee.value=18; limiter.ratio.value=8;
-      limiter.attack.value=0.003; limiter.release.value=0.2;
-      master.connect(limiter).connect(ctx.destination);
-
-      // ---- Buzz eléctrico (ruido) ----
-function setupBuzz(){
-  if (!ctx || buzz || humOscs.length) return;
-
-  // --- Mezclador principal que ya modulamos con scheduleBuzzCycle ---
-  buzzGain = ctx.createGain();
-  buzzGain.gain.value = 0.0; // lo sube/baja scheduleBuzzCycle
-  buzzGain.connect(master);
-
-  // ---------- HUM TONAL (mains 60Hz + armónicos) ----------
-  humGain = ctx.createGain();
-  humGain.gain.value = 0.50; // volumen base del hum dentro del buzzGain
-  humGain.connect(buzzGain);
-
-  const MAINS = 60; // si quisieras 50 Hz, cambia este valor
-  const partials = [1, 2, 3, 4, 5, 6]; // 60,120,180,240,300,360 Hz
-  partials.forEach((n, i) => {
-    const osc = ctx.createOscillator();
-    // Mezcla asimétrica: serrucho para “buzz” + leve desafine
-    osc.type = (i % 2 === 0) ? 'sawtooth' : 'square';
-    const pre = ctx.createGain();
-    // Baja el aporte de parciales altos
-    pre.gain.value = 0.08 / (i + 1); 
-    osc.frequency.value = MAINS * n;
-    osc.detune.value = (i === 0 ? 2 : (Math.random() * 4 - 2)); // ligerísimo “chorus”
-    osc.connect(pre).connect(humGain);
-    osc.start();
-    humOscs.push(osc);
-  });
-
-  // Distorsión suave para darle carácter eléctrico
-  const shaper = ctx.createWaveShaper();
-  // curva suave tipo tanh
-  const curve = new Float32Array(256);
-  for (let i = 0; i < curve.length; i++){
-    const x = (i / (curve.length - 1)) * 2 - 1;
-    curve[i] = Math.tanh(2.2 * x);
-  }
-  shaper.curve = curve;
-  shaper.oversample = '4x';
-
-  // Filtrado leve para no sonar a TV (suaviza agudos muy duros)
-  const lp = ctx.createBiquadFilter();
-  lp.type = 'lowpass';
-  lp.frequency.value = 800;
-
-const post = ctx.createGain();
-post.gain.value = 1.6; // 1.3–2.0 según gusto
-
-  // Reencamina HUM → Shaper → LP → buzzGain
-  humGain.disconnect();
-  humGain.connect(shaper).connect(lp).connect(buzzGain);
-
-  // ---------- SIZZLE ALTO (ruido muy sutil) ----------
-  // (para el “crackle” al encender)
-  const dur = 1.5;
-  const buffer = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < data.length; i++){
-    data[i] = (Math.random() * 2 - 1);
-  }
-  sizzleNoise = ctx.createBufferSource();
-  sizzleNoise.buffer = buffer;
-  sizzleNoise.loop = true;
-
-  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1500;
-  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2800; bp.Q.value = 1.2;
-
-  sizzleGain = ctx.createGain();
-  sizzleGain.gain.value = 0.018; // base MUY bajo
-
-  sizzleNoise.connect(hp).connect(bp).connect(sizzleGain).connect(buzzGain);
-  sizzleNoise.start();
-}
-
-setupBuzz();
-
+    // Helper: fade in suave al iniciar
+    function fadeInAudio(target = 0.85, ms = 800){
+      try {
+        const steps = 16, stepTime = ms/steps;
+        let v = 0;
+        bgm.volume = 0;
+        const id = setInterval(()=>{
+          v += target/steps;
+          bgm.volume = Math.min(v, target);
+          if (v >= target) clearInterval(id);
+        }, stepTime);
+      } catch(e){}
     }
 
-    function playBass(time, midi, vol=0.36){
-      const osc = ctx.createOscillator(); osc.type='triangle';
-      const g  = gain(0); const p = new StereoPannerNode(ctx,{pan:-0.05});
-      osc.frequency.setValueAtTime(mtof(midi), time);
-      env(g, time, BASS_ENV, vol, 0.7);
-      g.gain.setTargetAtTime(0.0001, time + BEAT*0.9, BASS_ENV.r);
-      osc.connect(g).connect(p).connect(bus);
-      osc.start(time); osc.stop(time + BEAT + 0.1);
-    }
-    function playChordStab(time, chordMidis, vol=0.18){
-      chordMidis.forEach((m, i)=>{
-        const osc = ctx.createOscillator();
-        osc.type = (i%2===0) ? 'sawtooth' : 'square';
-        const g  = gain(0); const p = new StereoPannerNode(ctx,{pan: i%2===0 ? 0.08 : -0.08});
-        const vcf= ctx.createBiquadFilter(); vcf.type='lowpass'; vcf.frequency.value = 1400;
-        osc.frequency.setValueAtTime(mtof(m), time);
-        env(g, time, {a:0.01,d:0.15,s:0.5,r:0.2}, vol, 0.5);
-        g.gain.setTargetAtTime(0.0001, time + BEAT*0.8, 0.12);
-        osc.connect(g).connect(vcf).connect(p).connect(bus);
-        osc.start(time); osc.stop(time + BEAT + 0.1);
-      });
-    }
-    function playGlock(time, midi, vol=0.22){
-      const s1 = ctx.createOscillator(); s1.type='sine';
-      const s2 = ctx.createOscillator(); s2.type='sine';
-      const g  = gain(0); const hp = ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=180;
-      s1.frequency.setValueAtTime(mtof(midi), time);
-      s2.frequency.setValueAtTime(mtof(midi)*2.01, time);
-      env(g, time, GLOCK_ENV, vol, 0.0);
-      g.gain.exponentialRampToValueAtTime(0.0001, time + 1.1);
-      s1.connect(hp).connect(g).connect(bus);
-      s2.connect(hp).connect(g).connect(bus);
-      s1.start(time); s2.start(time);
-      s1.stop(time+1.2); s2.stop(time+1.2);
-    }
-    function playLead(time, midi, vol=0.28){
-      const o = ctx.createOscillator(); o.type='square';
-      const g = gain(0); const vcf = ctx.createBiquadFilter(); vcf.type='lowpass'; vcf.frequency.value=1500;
-      const p = new StereoPannerNode(ctx,{pan:0.06});
-      if (playLead.lastFreq){
-        o.frequency.setValueAtTime(playLead.lastFreq, time);
-        o.frequency.exponentialRampToValueAtTime(mtof(midi), time + GLIDE);
-      } else {
-        o.frequency.setValueAtTime(mtof(midi), time);
-      }
-      playLead.lastFreq = mtof(midi);
-      env(g, time, LEAD_ENV, vol, LEAD_ENV.s);
-      const len = STEP*0.95;
-      g.gain.setTargetAtTime(0.0001, time + len, LEAD_ENV.r);
-      o.connect(g).connect(vcf).connect(p).connect(bus);
-      o.start(time); o.stop(time + len + LEAD_ENV.r + 0.05);
-    }
-    function playTheremin(time, startMidi, endMidi, dur=1.8, vol=0.18){
-      const o = ctx.createOscillator(); o.type='sine';
-      const g = gain(0); const p = new StereoPannerNode(ctx,{pan:0.1});
-      env(g, time, {a:0.2,d:0.2,s:0.7,r:0.5}, vol, 0.7);
-      o.frequency.setValueAtTime(mtof(startMidi), time);
-      o.frequency.linearRampToValueAtTime(mtof(endMidi), time + dur*0.7);
-      g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
-      o.connect(g).connect(p).connect(bus);
-      o.start(time); o.stop(time + dur + 0.1);
-    }
-
-    function startSeq(){
-      if (running) return; running = true;
-      let next = ctx.currentTime + 0.06;
-      const lookAhead = 0.1, horizon = 0.25;
-
-      function loop(){
-        while (next < ctx.currentTime + horizon){
-          const sixBarLen = 6;
-          const bar = Math.floor((step * STEP) / (BEAT*3)) % sixBarLen;
-          const posInBar = ((step * STEP) % (BEAT*3)) / BEAT;
-
-          if (Math.abs(posInBar - 0) < 0.001){
-            const deg = bassRootDeg[bar];
-            const rootMidi = ROOT + SCALE[(deg % SCALE.length + SCALE.length) % SCALE.length];
-            playBass(next, rootMidi);
-          }
-          if (Math.abs(posInBar - 1) < 0.001 || Math.abs(posInBar - 2) < 0.001){
-            const chord = chordDegrees[bar].map(d => ROOT + d);
-            playChordStab(next, chord);
-          }
-          if (step % 2 === 0){
-            const idx = (bar*16) + ((step/2)%16|0);
-            const degOff = melody16ths[idx % melody16ths.length];
-            const scaleIdx = ((degOff % SCALE.length) + SCALE.length) % SCALE.length;
-            const midi = (ROOT + 12) + SCALE[scaleIdx];
-            playGlock(next, midi);
-          }
-          if ([0.5, 1.5, 2.5].some(v => Math.abs(posInBar - v) < 0.001)){
-            const idx = (bar*16) + ((step)%16);
-            const degOff = melody16ths[idx % melody16ths.length] + (bar===4 ? 2 : 0);
-            const scaleIdx = ((degOff % SCALE.length) + SCALE.length) % SCALE.length;
-            const midi = (ROOT + 12) + SCALE[scaleIdx];
-            playLead(next, midi);
-          }
-          if (Math.abs(posInBar - 0) < 0.001 && (bar === 2 || bar === 5)){
-            playTheremin(next + 0.05, ROOT+SCALE[0]+12, ROOT+SCALE[3]+19, 1.6, 0.14);
-          }
-
-          next += STEP;
-          step++;
-        }
-        schedId = setTimeout(loop, lookAhead*1000);
-      }
-      loop();
-
-      const fxLoop = () => {
-        const t = ctx.currentTime + 0.2;
-        [0,3,7,12].forEach((d,i)=>{ playGlock(t + i*0.12, ROOT + d + 24, 0.18); });
-        fxTimer = setTimeout(fxLoop, 9000 + Math.random()*5000);
-      };
-      fxLoop();
-    }
-
-    startBuzzSync();
-
-    function stopSeq(){
-      running = false;
-      if (schedId){ clearTimeout(schedId); schedId = null; }
-      if (fxTimer){ clearTimeout(fxTimer); fxTimer = null; }
-      step = 0;
-    }
-
+    // Inicia al tocar la pantalla (cumple autoplay)
     welcomeScreen.addEventListener('click', async ()=>{
       welcomeScreen.style.opacity = '0';
       invitationCardContent.classList.add('show-card');
       setTimeout(()=>welcomeScreen.style.display='none', 500);
 
-      if (!ctx) init();
-      try{ await ctx.resume(); }catch(e){}
-      startSeq();
-      startBuzzSync(); // 👈 encendemos el zumbido sincronizado
-      portalHit();
+      try{
+        await bgm.play();
+        fadeInAudio(0.85, 900);
+        toggleBtn.setAttribute('aria-pressed','false');
+        toggleBtn.textContent = '🔊 Sonido';
+      }catch(err){
+        // Si falla (algún navegador), muestra botón para iniciar
+        toggleBtn.textContent = '▶️ Activar audio';
+        toggleBtn.setAttribute('aria-pressed','true');
+      }
     }, { passive:true });
 
-    function portalHit(){
-      const t = ctx.currentTime + 0.02;
-      const o = ctx.createOscillator(); o.type='square';
-      const a = gain(0); const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=600; bp.Q.value=2.2;
-      o.frequency.setValueAtTime(200,t); o.frequency.exponentialRampToValueAtTime(70,t+0.3);
-      env(a,t,{a:0.01,d:0.07,s:0,r:0.28},0.7,0); a.gain.exponentialRampToValueAtTime(0.0001,t+0.34);
-      o.connect(bp).connect(a).connect(bus); o.start(t); o.stop(t+0.36);
-    }
-
-    function scheduleBuzzCycle(t0){
-  if (!buzzGain) return;
-
-  const onMarks  = [0, 0.18, 0.22, 0.25, 0.53, 0.57, 1.00];
-  const offMarks = [0.20, 0.24, 0.55];
-
-  // Volumen del conjunto HUM+SIZZLE dentro de buzzGain
-  const ON  = 0.65;  // sube si lo quieres más presente (0.22–0.45)
-  const OFF = 0.0;
-
-  onMarks.forEach(p  => buzzGain.gain.setValueAtTime(ON,  t0 + p * FLICKER_PERIOD));
-  offMarks.forEach(p => buzzGain.gain.setValueAtTime(OFF, t0 + p * FLICKER_PERIOD));
-  buzzGain.gain.setTargetAtTime(OFF, t0 + FLICKER_PERIOD, 0.01);
-
-  // ---- Crackle corto al encender (solo si sizzleGain existe) ----
-  if (sizzleGain){
-    const base = 0.018;   // base sutil
-    const snap = 0.11;    // chispazo momentáneo
-    onMarks.forEach(p => {
-      const tp = t0 + p * FLICKER_PERIOD;
-      sizzleGain.gain.setValueAtTime(snap, tp);
-      sizzleGain.gain.setTargetAtTime(base, tp + 0.03, 0.01); // cae en ~30ms
+    // Botón Silenciar / Activar
+    toggleBtn.addEventListener('click', async ()=>{
+      if (bgm.paused){
+        try{
+          await bgm.play();
+          toggleBtn.textContent = '🔊 Sonido';
+          toggleBtn.setAttribute('aria-pressed','false');
+        }catch(e){
+          // ignorar
+        }
+      } else {
+        bgm.pause();
+        toggleBtn.textContent = '🔇 Silenciado';
+        toggleBtn.setAttribute('aria-pressed','true');
+      }
     });
-  }
-}
 
-function startBuzzSync(){
-  if (!ctx) return;
-  if (!buzz) { /* por si acaso */ if (typeof setupBuzz === 'function') setupBuzz(); }
-  if (buzzTimer) return;
-
-  // programa el primer ciclo un pelín en el futuro
-  const t0 = ctx.currentTime + 0.05;
-  scheduleBuzzCycle(t0);
-
-  // reprograma en cada periodo para ir en fase con el parpadeo del botón
-  buzzTimer = setInterval(()=>{
-    scheduleBuzzCycle(ctx.currentTime);
-  }, FLICKER_PERIOD * 1000);
-}
-
-function stopBuzzSync(){
-  if (buzzTimer){ clearInterval(buzzTimer); buzzTimer = null; }
-  if (buzzGain){ buzzGain.gain.setTargetAtTime(0.0, ctx?.currentTime ?? 0, 0.03); }
-}
-
-
-  document.addEventListener('visibilitychange', ()=>{
-  if (!ctx) return;
-  if (document.hidden){
-    stopSeq();
-    stopBuzzSync(); // 👈 apaga buzz al ocultar
-  } else if (!running){
-    startSeq();
-    startBuzzSync(); // 👈 vuelve a encender al volver
-  }
-});
-
-    window.__toy_spooky = {
-      tempo(bpm){ stopSeq(); const beat = 60/bpm; startSeq(); },
-      dark(hz){ darkLP && darkLP.frequency.setTargetAtTime(hz, ctx.currentTime, .3); },
-      wet(v){ bus && bus.gain.setTargetAtTime(v, ctx.currentTime, .2); },
-      master(v){ master && (master.gain.value=v); }
-    };
-  })();
+    // Pausa al cambiar de pestaña para ser amable con el usuario/batería
+    document.addEventListener('visibilitychange', ()=>{
+      if (document.hidden){
+        if (!bgm.paused) bgm.pause();
+      } else {
+        // no autoiniciar aquí para no romper expectativas; el usuario o el toque inicial lo harán
+      }
+    });
   </script>
 </body>
 </html>
