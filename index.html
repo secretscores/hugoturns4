@@ -231,6 +231,9 @@
     let buzz, buzzGain, buzzFilter, buzzTimer = null;
     const FLICKER_PERIOD = 1.5; // igual que tu animación del botón
 
+    let humOscs = [], humGain;        // zumbido 60 Hz + armónicos
+let sizzleNoise, sizzleGain;       // sizzle alto
+
     let ctx, master, bus, limiter, delayA, delayB, darkLP;
     let running = false, step = 0, schedId = null, fxTimer = null;
 
@@ -294,28 +297,79 @@
 
       // ---- Buzz eléctrico (ruido) ----
 function setupBuzz(){
-  if (buzz) return;
-  // buffer de ruido blanco de 2s
-  const dur = 2.0;
+  if (!ctx || buzz || humOscs.length) return;
+
+  // --- Mezclador principal que ya modulamos con scheduleBuzzCycle ---
+  buzzGain = ctx.createGain();
+  buzzGain.gain.value = 0.0; // lo sube/baja scheduleBuzzCycle
+  buzzGain.connect(master);
+
+  // ---------- HUM TONAL (mains 60Hz + armónicos) ----------
+  humGain = ctx.createGain();
+  humGain.gain.value = 0.50; // volumen base del hum dentro del buzzGain
+  humGain.connect(buzzGain);
+
+  const MAINS = 60; // si quisieras 50 Hz, cambia este valor
+  const partials = [1, 2, 3, 4, 5, 6]; // 60,120,180,240,300,360 Hz
+  partials.forEach((n, i) => {
+    const osc = ctx.createOscillator();
+    // Mezcla asimétrica: serrucho para “buzz” + leve desafine
+    osc.type = (i % 2 === 0) ? 'sawtooth' : 'square';
+    const pre = ctx.createGain();
+    // Baja el aporte de parciales altos
+    pre.gain.value = 0.08 / (i + 1); 
+    osc.frequency.value = MAINS * n;
+    osc.detune.value = (i === 0 ? 2 : (Math.random() * 4 - 2)); // ligerísimo “chorus”
+    osc.connect(pre).connect(humGain);
+    osc.start();
+    humOscs.push(osc);
+  });
+
+  // Distorsión suave para darle carácter eléctrico
+  const shaper = ctx.createWaveShaper();
+  // curva suave tipo tanh
+  const curve = new Float32Array(256);
+  for (let i = 0; i < curve.length; i++){
+    const x = (i / (curve.length - 1)) * 2 - 1;
+    curve[i] = Math.tanh(2.2 * x);
+  }
+  shaper.curve = curve;
+  shaper.oversample = '4x';
+
+  // Filtrado leve para no sonar a TV (suaviza agudos muy duros)
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = 800;
+
+const post = ctx.createGain();
+post.gain.value = 1.6; // 1.3–2.0 según gusto
+
+  // Reencamina HUM → Shaper → LP → buzzGain
+  humGain.disconnect();
+  humGain.connect(shaper).connect(lp).connect(buzzGain);
+
+  // ---------- SIZZLE ALTO (ruido muy sutil) ----------
+  // (para el “crackle” al encender)
+  const dur = 1.5;
   const buffer = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
   const data = buffer.getChannelData(0);
   for (let i = 0; i < data.length; i++){
-    data[i] = (Math.random() * 2 - 1) * 0.6; // ruido blanco
+    data[i] = (Math.random() * 2 - 1);
   }
-  buzz = ctx.createBufferSource();
-  buzz.buffer = buffer;
-  buzz.loop = true;
+  sizzleNoise = ctx.createBufferSource();
+  sizzleNoise.buffer = buffer;
+  sizzleNoise.loop = true;
 
-  buzzFilter = ctx.createBiquadFilter();
-  buzzFilter.type = 'bandpass';
-  buzzFilter.frequency.value = 1200; // brillo "eléctrico"
-  buzzFilter.Q.value = 1.1;
+  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1500;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2800; bp.Q.value = 1.2;
 
-  buzzGain = gain(0.0); // arrancamos silencioso (lo modulamos luego)
-  // Lo mandamos directo al master para que quede "debajo" de la música
-  buzz.connect(buzzFilter).connect(buzzGain).connect(master);
-  buzz.start();
+  sizzleGain = ctx.createGain();
+  sizzleGain.gain.value = 0.018; // base MUY bajo
+
+  sizzleNoise.connect(hp).connect(bp).connect(sizzleGain).connect(buzzGain);
+  sizzleNoise.start();
 }
+
 setupBuzz();
 
     }
@@ -468,20 +522,28 @@ setupBuzz();
 
     function scheduleBuzzCycle(t0){
   if (!buzzGain) return;
-  // Copiamos la lógica del keyframe: ON en 0,18,22,25,53,57,100% y OFF en 20,24,55%
+
   const onMarks  = [0, 0.18, 0.22, 0.25, 0.53, 0.57, 1.00];
   const offMarks = [0.20, 0.24, 0.55];
 
-  // nivel del buzz cuando "enciende" (ajústalo a gusto: 0.10–0.20)
-  const ON  = 0.14;
+  // Volumen del conjunto HUM+SIZZLE dentro de buzzGain
+  const ON  = 0.65;  // sube si lo quieres más presente (0.22–0.45)
   const OFF = 0.0;
 
-  // Programamos el gain con timestamps de AudioContext para que quede super estable
-  onMarks.forEach(p  => buzzGain.gain.setValueAtTime(ON,  t0 + p  * FLICKER_PERIOD));
-  offMarks.forEach(p => buzzGain.gain.setValueAtTime(OFF, t0 + p  * FLICKER_PERIOD));
-
-  // aseguramos caída al final del ciclo
+  onMarks.forEach(p  => buzzGain.gain.setValueAtTime(ON,  t0 + p * FLICKER_PERIOD));
+  offMarks.forEach(p => buzzGain.gain.setValueAtTime(OFF, t0 + p * FLICKER_PERIOD));
   buzzGain.gain.setTargetAtTime(OFF, t0 + FLICKER_PERIOD, 0.01);
+
+  // ---- Crackle corto al encender (solo si sizzleGain existe) ----
+  if (sizzleGain){
+    const base = 0.018;   // base sutil
+    const snap = 0.11;    // chispazo momentáneo
+    onMarks.forEach(p => {
+      const tp = t0 + p * FLICKER_PERIOD;
+      sizzleGain.gain.setValueAtTime(snap, tp);
+      sizzleGain.gain.setTargetAtTime(base, tp + 0.03, 0.01); // cae en ~30ms
+    });
+  }
 }
 
 function startBuzzSync(){
