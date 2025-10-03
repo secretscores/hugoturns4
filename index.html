@@ -61,14 +61,10 @@
       will-change: transform;
     }
 
+    /* Tarjeta sin woody: solo fondo base */
     .invitation-card{
       width:100%; height:100%;
-      background:
-        linear-gradient(145deg, rgba(0,0,0,0.70), rgba(0,0,0,0.70)),
-        url('woodyterr.webp'),
-        url('background1.webp');
-      background-size: cover, cover, cover;
-      background-position: center, center, center;
+      background:url('background1.webp') center/cover no-repeat;
       border-radius:30px;
       box-shadow:0 15px 50px rgba(0,0,0,.7), 0 0 25px var(--accent-purple);
       padding:30px 20px;
@@ -83,7 +79,32 @@
     }
     .show-card{ opacity:1 !important; transform: rotateY(0deg) !important; }
 
-    /* relámpagos 5s (capa recortada a la silueta) */
+    /* Woody con el MISMO velo sombrío + bordes difuminados */
+    .invitation-card::before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        /* velo sombrío idéntico al de antes */
+        linear-gradient(145deg, rgba(0,0,0,0.70), rgba(0,0,0,0.70)),
+        url('woodyterr.webp');
+      background-size: cover, cover;
+      background-position: center, center;
+      border-radius: inherit;
+      z-index:0;
+
+      /* difuminado hacia los bordes */
+      -webkit-mask-image: radial-gradient(120% 120% at 50% 50%,
+                          rgba(0,0,0,1) 60%,
+                          rgba(0,0,0,0) 85%);
+              mask-image: radial-gradient(120% 120% at 50% 50%,
+                          rgba(0,0,0,1) 60%,
+                          rgba(0,0,0,0) 85%);
+      -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+      -webkit-mask-size:100% 100%;  mask-size:100% 100%;
+      filter: blur(.2px); /* micro suavizado opcional */
+    }
+
+    /* Relámpago recortado a la silueta de woody */
     .woody-backlight{
       position:absolute; inset:0; border-radius:30px; pointer-events:none;
       z-index:1;
@@ -141,7 +162,7 @@
     }
     .location-button:hover{ background:var(--accent-orange); color:#fff; box-shadow:0 0 25px var(--accent-orange); transform:scale(1.05); }
 
-    /* Efectos flotantes (si usas el span con clase bat1, mantenlo) */
+    /* Efectos flotantes */
     .effect-item{
       position:absolute; font-size:3em; opacity:.5; pointer-events:none; animation:float-and-sway 15s linear infinite;
       filter:drop-shadow(0 0 5px rgba(255,255,255,.5)); z-index:9999;
@@ -235,18 +256,30 @@
     const bgm = document.getElementById('bgm');
 
     function fadeInAudio(target = 0.85, ms = 800){
-      try { const steps = 16, stepTime = ms/steps; let v = 0; bgm.volume = 0;
-        const id = setInterval(()=>{ v += target/steps; bgm.volume = Math.min(v, target); if (v >= target) clearInterval(id); }, stepTime);
+      try {
+        const steps = 16, stepTime = ms/steps; let v = 0; bgm.volume = 0;
+        const id = setInterval(()=>{
+          v += target/steps; bgm.volume = Math.min(v, target);
+          if (v >= target) clearInterval(id);
+        }, stepTime);
       } catch(e){}
     }
     let musicStarted = false;
     async function startMusicFrom10s(){
       try{
-        const seekAndPlay = async () => { try { bgm.currentTime = 10; } catch(e) {} await bgm.play(); fadeInAudio(0.85, 900); musicStarted = true; };
+        const seekAndPlay = async () => {
+          try { bgm.currentTime = 10; } catch(e) {}
+          await bgm.play(); fadeInAudio(0.85, 900); musicStarted = true;
+        };
         if (bgm.readyState >= 1){ await seekAndPlay(); }
         else{
-          bgm.addEventListener('loadedmetadata', async function onMeta(){ bgm.removeEventListener('loadedmetadata', onMeta); await seekAndPlay(); });
-          bgm.addEventListener('canplay', async function onCan(){ bgm.removeEventListener('canplay', onCan); if (!musicStarted) await seekAndPlay(); });
+          bgm.addEventListener('loadedmetadata', async function onMeta(){
+            bgm.removeEventListener('loadedmetadata', onMeta); await seekAndPlay();
+          });
+          bgm.addEventListener('canplay', async function onCan(){
+            bgm.removeEventListener('canplay', onCan);
+            if (!musicStarted) await seekAndPlay();
+          });
         }
       }catch(err){ try { await bgm.play(); } catch(e){} }
     }
@@ -282,90 +315,58 @@
     window.addEventListener('orientationchange', fitCard);
     window.addEventListener('load', fitCard);
 
-    /* ====== TRUENO SINTÉTICO (0.6s) SIN ARCHIVO ====== */
+    /* ====== TRUENO SINTÉTICO (0.6s) ====== */
     let audioCtx = null, masterThunderGain = null;
     function setupThunderAudio(){
       if (audioCtx) return;
       const Ctx = window.AudioContext || window.webkitAudioContext;
       audioCtx = new Ctx();
-
-      // Master gain para controlar el volumen del trueno (suave)
       masterThunderGain = audioCtx.createGain();
-      masterThunderGain.gain.value = 0.25; // volumen general del trueno (ajústalo si quieres)
+      masterThunderGain.gain.value = 0.25;
       masterThunderGain.connect(audioCtx.destination);
     }
-
     function playThunder(duration = 0.6){
       if (!audioCtx) return;
 
-      // --- Capa de ruido (cuerpo del trueno) ---
       const rate = audioCtx.sampleRate;
       const buffer = audioCtx.createBuffer(1, Math.floor(rate * duration), rate);
       const data = buffer.getChannelData(0);
-      for (let i = 0; i < data.length; i++) {
-        // ruido blanco con leve atenuación inicial
-        data[i] = (Math.random() * 2 - 1) * 0.9;
-      }
-      const noise = audioCtx.createBufferSource();
-      noise.buffer = buffer;
+      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.9;
 
-      const noiseFilter = audioCtx.createBiquadFilter();
-      noiseFilter.type = 'lowpass';
-      noiseFilter.frequency.value = 1800; // recorta agudos para no ser chillón
-
+      const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+      const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type = 'lowpass'; noiseFilter.frequency.value = 1800;
       const noiseGain = audioCtx.createGain();
-      // Envolvente: golpe rápido que cae
       const now = audioCtx.currentTime;
       noiseGain.gain.setValueAtTime(0.0, now);
       noiseGain.gain.linearRampToValueAtTime(1.0, now + 0.05);
       noiseGain.gain.exponentialRampToValueAtTime(0.05, now + duration);
 
-      // Cadena
-      noise.connect(noiseFilter);
-      noiseFilter.connect(noiseGain);
-      noiseGain.connect(masterThunderGain);
+      noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(masterThunderGain);
 
-      // --- Sub-rumble (grave muy suave) ---
-      const osc = audioCtx.createOscillator();
-      const oscGain = audioCtx.createGain();
-      osc.type = 'sine';
-      // leve aleatoriedad para que no suene idéntico siempre
-      osc.frequency.value = 45 + Math.random()*12; // 45–57 Hz
+      const osc = audioCtx.createOscillator(); const oscGain = audioCtx.createGain();
+      osc.type = 'sine'; osc.frequency.value = 45 + Math.random()*12;
       oscGain.gain.setValueAtTime(0.0, now);
       oscGain.gain.linearRampToValueAtTime(0.08, now + 0.05);
       oscGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
 
-      osc.connect(oscGain);
-      oscGain.connect(masterThunderGain);
+      osc.connect(oscGain); oscGain.connect(masterThunderGain);
 
-      // start/stop
-      noise.start(now);
-      noise.stop(now + duration);
-      osc.start(now);
-      osc.stop(now + duration);
+      noise.start(now); noise.stop(now + duration);
+      osc.start(now);   osc.stop(now + duration);
     }
 
-    /* ====== RELÁMPAGO CADA 6–8s (aleatorio) CON TRUENO SINCRONIZADO ====== */
+    /* ====== RELÁMPAGO ALEATORIO CADA 6–8s ====== */
     function startLightning(){
       const card = invitationCardContent;
       if (window.__lightTimer) clearInterval(window.__lightTimer);
 
       function flash(){
-        // activar iluminación visual
         card.classList.add('lightning');
-        // trueno 0.6s sincronizado con la animación
         playThunder(0.6);
-        // limpiar clase tras terminar
         setTimeout(()=> card.classList.remove('lightning'), 700);
       }
-
-      // primer destello después de 2s
       setTimeout(flash, 2000);
-
-      // cada 6–8 s un destello aleatorio
-      window.__lightTimer = setInterval(()=>{
-        flash();
-      }, 6000 + Math.random()*2000);
+      window.__lightTimer = setInterval(()=>{ flash(); }, 6000 + Math.random()*2000);
     }
 
     /* ====== INICIO TRAS TAP ====== */
@@ -376,9 +377,7 @@
 
       await startMusicFrom10s();
 
-      // preparar WebAudio (necesita gesto del usuario para iOS)
       setupThunderAudio();
-      // algunos navegadores requieren resume
       if (audioCtx && audioCtx.state === 'suspended') { try { await audioCtx.resume(); } catch(e){} }
 
       startLightning();
