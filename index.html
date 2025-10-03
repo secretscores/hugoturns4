@@ -156,17 +156,8 @@
       object-fit: contain;
       pointer-events: none;
     }
-    /* Rota iconos específicos si los usas */
     .effect-item:nth-of-type(1) img { transform: rotate(10deg); }
     .effect-item:nth-of-type(4) img { transform: rotate(15deg); }
-
-    /* Botón de mute (opcional, discreto) */
-    .audio-toggle{
-      position:fixed; right:14px; bottom:14px; z-index:1200;
-      background:rgba(0,0,0,.55); color:#fff; border:1px solid rgba(255,255,255,.2);
-      padding:10px 14px; border-radius:999px; font-size:.85em; cursor:pointer;
-      backdrop-filter: blur(6px);
-    }
   </style>
 </head>
 <body>
@@ -178,7 +169,6 @@
 
   <!-- Tarjeta -->
   <div class="invitation-card" id="invitation-card-content">
-    <!-- Ícono flotante de ejemplo -->
     <span class="effect-item"><img src="iconpic1.webp" alt=""></span>
 
     <h1 class="portal-text">HUGO TURNS 4!</h1>
@@ -196,9 +186,8 @@
     <p style="font-size:.9em; color:var(--accent-purple);">Buuu!</p>
   </div>
 
-  <!-- AUDIO: usa tu archivo local HalloweenWaltzz.mp3 -->
+  <!-- AUDIO de fondo desde archivo local -->
   <audio id="bgm" src="HalloweenWaltzz.mp3" preload="auto" loop></audio>
-  <button id="audio-toggle" class="audio-toggle" aria-pressed="false" title="Silenciar/Activar audio">🔊 Sonido</button>
 
   <script>
     /* =========================
@@ -221,12 +210,8 @@
     const welcomeScreen = document.getElementById('welcome-screen');
     const invitationCardContent = document.getElementById('invitation-card-content');
     const bgm = document.getElementById('bgm');
-    const toggleBtn = document.getElementById('audio-toggle');
 
-    // Volumen inicial moderado
-    bgm.volume = 0.85;
-
-    // Helper: fade in suave al iniciar
+    // Volumen inicial moderado + fade-in
     function fadeInAudio(target = 0.85, ms = 800){
       try {
         const steps = 16, stepTime = ms/steps;
@@ -240,47 +225,160 @@
       } catch(e){}
     }
 
-    // Inicia al tocar la pantalla (cumple autoplay)
+    // Reproducción desde el segundo 10 (una sola vez)
+    let musicStarted = false;
+    async function startMusicFrom10s(){
+      try{
+        // Si ya hay metadata, podemos fijar currentTime; si no, esperamos al evento.
+        const seekAndPlay = async () => {
+          try { bgm.currentTime = 10; } catch(e) {}
+          await bgm.play();
+          fadeInAudio(0.85, 900);
+          musicStarted = true;
+        };
+        if (bgm.readyState >= 1){ // HAVE_METADATA
+          await seekAndPlay();
+        } else {
+          const onMeta = async () => {
+            bgm.removeEventListener('loadedmetadata', onMeta);
+            await seekAndPlay();
+          };
+          bgm.addEventListener('loadedmetadata', onMeta);
+          // Por si algunos navegadores disparan canplay primero
+          const onCanPlay = async () => {
+            bgm.removeEventListener('canplay', onCanPlay);
+            if (!musicStarted) await seekAndPlay();
+          };
+          bgm.addEventListener('canplay', onCanPlay);
+        }
+      }catch(err){
+        // Si fallara, el usuario ya hizo tap, así que un segundo intento suele funcionar
+        try { await bgm.play(); } catch(e){}
+      }
+    }
+
+    /* =========================
+       BUZZ eléctrico sincronizado al parpadeo
+       ========================= */
+    const FLICKER_PERIOD = 1.5; // Debe coincidir con la animación CSS
+    let ctx, buzzGain, sizzleGain, humOscs = [], buzzTimer = null;
+
+    function initBuzz(){
+      if (ctx) return;
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+      // Mezcla principal del buzz
+      buzzGain = ctx.createGain();
+      buzzGain.gain.value = 0.0; // se controla con scheduleBuzzCycle
+      buzzGain.connect(ctx.destination);
+
+      // HUM (60 Hz + armónicos) con leve distorsión y filtro
+      const humMix = ctx.createGain(); humMix.gain.value = 0.5;
+
+      const MAINS = 60; // cambia a 50 si lo prefieres
+      const partials = [1,2,3,4,5,6];
+      partials.forEach((n, i) => {
+        const osc = ctx.createOscillator();
+        osc.type = (i % 2 === 0) ? 'sawtooth' : 'square';
+        const pre = ctx.createGain();
+        pre.gain.value = 0.08 / (i + 1);
+        osc.frequency.value = MAINS * n;
+        osc.detune.value = (i === 0 ? 2 : (Math.random() * 4 - 2));
+        osc.connect(pre).connect(humMix);
+        osc.start();
+        humOscs.push(osc);
+      });
+
+      const shaper = ctx.createWaveShaper();
+      const curve = new Float32Array(256);
+      for (let i = 0; i < curve.length; i++){
+        const x = (i / (curve.length - 1)) * 2 - 1;
+        curve[i] = Math.tanh(2.2 * x);
+      }
+      shaper.curve = curve;
+      shaper.oversample = '4x';
+
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 800;
+
+      humMix.connect(shaper).connect(lp).connect(buzzGain);
+
+      // SIZZLE (ruido banda alta) sutil para el “crackle”
+      const dur = 1.5;
+      const buffer = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++){ data[i] = (Math.random() * 2 - 1); }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer; noise.loop = true;
+
+      const hp = ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value = 1500;
+      const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value = 2800; bp.Q.value = 1.2;
+
+      sizzleGain = ctx.createGain(); sizzleGain.gain.value = 0.018;
+
+      noise.connect(hp).connect(bp).connect(sizzleGain).connect(buzzGain);
+      noise.start();
+    }
+
+    function scheduleBuzzCycle(t0){
+      if (!buzzGain) return;
+      // mismos hitos que la animación del botón
+      const onMarks  = [0, 0.18, 0.22, 0.25, 0.53, 0.57, 1.00];
+      const offMarks = [0.20, 0.24, 0.55];
+
+      const ON  = 0.65;
+      const OFF = 0.0;
+
+      onMarks.forEach(p  => buzzGain.gain.setValueAtTime(ON,  t0 + p * FLICKER_PERIOD));
+      offMarks.forEach(p => buzzGain.gain.setValueAtTime(OFF, t0 + p * FLICKER_PERIOD));
+      buzzGain.gain.setTargetAtTime(OFF, t0 + FLICKER_PERIOD, 0.01);
+
+      // chispazo breve al encender
+      if (sizzleGain){
+        const base = 0.018, snap = 0.11;
+        onMarks.forEach(p => {
+          const tp = t0 + p * FLICKER_PERIOD;
+          sizzleGain.gain.setValueAtTime(snap, tp);
+          sizzleGain.gain.setTargetAtTime(base, tp + 0.03, 0.01);
+        });
+      }
+    }
+
+    function startBuzzSync(){
+      if (!ctx) return;
+      if (!buzzTimer){
+        const t0 = ctx.currentTime + 0.05;
+        scheduleBuzzCycle(t0);
+        buzzTimer = setInterval(()=>scheduleBuzzCycle(ctx.currentTime), FLICKER_PERIOD * 1000);
+      }
+    }
+    function stopBuzzSync(){
+      if (buzzTimer){ clearInterval(buzzTimer); buzzTimer = null; }
+      if (buzzGain){ buzzGain.gain.setTargetAtTime(0.0, ctx?.currentTime ?? 0, 0.03); }
+    }
+
+    // Inicio tras el toque de bienvenida (cumple autoplay)
     welcomeScreen.addEventListener('click', async ()=>{
       welcomeScreen.style.opacity = '0';
       invitationCardContent.classList.add('show-card');
       setTimeout(()=>welcomeScreen.style.display='none', 500);
 
-      try{
-        await bgm.play();
-        fadeInAudio(0.85, 900);
-        toggleBtn.setAttribute('aria-pressed','false');
-        toggleBtn.textContent = '🔊 Sonido';
-      }catch(err){
-        // Si falla (algún navegador), muestra botón para iniciar
-        toggleBtn.textContent = '▶️ Activar audio';
-        toggleBtn.setAttribute('aria-pressed','true');
-      }
+      // Música (desde 10s)
+      await startMusicFrom10s();
+
+      // Buzz
+      if (!ctx) initBuzz();
+      try { await ctx.resume(); } catch(e) {}
+      startBuzzSync();
     }, { passive:true });
 
-    // Botón Silenciar / Activar
-    toggleBtn.addEventListener('click', async ()=>{
-      if (bgm.paused){
-        try{
-          await bgm.play();
-          toggleBtn.textContent = '🔊 Sonido';
-          toggleBtn.setAttribute('aria-pressed','false');
-        }catch(e){
-          // ignorar
-        }
-      } else {
-        bgm.pause();
-        toggleBtn.textContent = '🔇 Silenciado';
-        toggleBtn.setAttribute('aria-pressed','true');
-      }
-    });
-
-    // Pausa al cambiar de pestaña para ser amable con el usuario/batería
-    document.addEventListener('visibilitychange', ()=>{
+    // Manejo de visibilidad: reanudar al volver (ya hubo gesto del usuario)
+    document.addEventListener('visibilitychange', async ()=>{
       if (document.hidden){
-        if (!bgm.paused) bgm.pause();
+        try { if (!bgm.paused) bgm.pause(); } catch(e){}
+        stopBuzzSync();
       } else {
-        // no autoiniciar aquí para no romper expectativas; el usuario o el toque inicial lo harán
+        try { await bgm.play(); } catch(e){}
+        if (ctx) { try { ctx.resume(); } catch(e){} startBuzzSync(); }
       }
     });
   </script>
