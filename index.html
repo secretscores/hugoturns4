@@ -2,47 +2,77 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
   <title>🎃Happy Halloween Birthday🧟</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Creepster&display=swap" rel="stylesheet">
   <style>
     :root{
-      --dark-bg:#10001D; --accent-purple:#9D3CFF; --accent-orange:#FF8C00; --accent-purple:#9D3CFF;
+      --dark-bg:#10001D; --accent-purple:#9D3CFF; --accent-orange:#FF8C00;
       --text-color:#E0E0E0;
       --font-main:'Montserrat',sans-serif; --font-title:'Creepster',cursive;
+
+      /* margen exterior (respeta notch/gestos) */
+      --frame-pad: 20px;
+
+      /* tamaño base de TU tarjeta (no se mide del DOM) */
+      --base-w: 380px;
+      --base-h: 680px;
+
+      /* “respiración” interna de la frame para que no se corte el glow */
+      --pad-x: 36px; /* total (izq+der) */
+      --pad-y: 44px; /* total (arr+abajo) */
     }
+
+    html, body { height: 100%; margin:0; }
+
+    /* Fondo y padding seguro */
     body{
       font-family:var(--font-main); color:var(--text-color); background-color:var(--dark-bg);
-      margin:0; padding:0; display:flex; justify-content:center; align-items:center; min-height:100vh;
-      overflow:hidden; position:relative;
-      background-image:radial-gradient(#2a0045 40%,transparent 40%), radial-gradient(#2a0045 20%,transparent 20%);
+      overflow:hidden; min-height:100svh;
+      background-image:
+        radial-gradient(#2a0045 40%,transparent 40%),
+        radial-gradient(#2a0045 20%,transparent 20%);
       background-size:5px 5px; background-position:0 0, 10px 10px;
+      padding: max(var(--frame-pad), env(safe-area-inset-top))
+               max(var(--frame-pad), env(safe-area-inset-right))
+               max(var(--frame-pad), env(safe-area-inset-bottom))
+               max(var(--frame-pad), env(safe-area-inset-left));
     }
+    @supports (min-height: 100dvh) { body { min-height: 100dvh; } }
+
+    /* Overlay de bienvenida (igual que el tuyo) */
     #welcome-screen{
       position:fixed; inset:0; background-color:var(--dark-bg);
       display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:1000;
       cursor:pointer; transition:opacity .5s ease-out;
     }
     .portal-text{
-      font-family:var(--font-title);
-      font-size:3em;
-      font-weight:700;
-      color:var(--accent-orange);
-      margin-bottom:20px;
-      line-height:1.1;
+      font-family:var(--font-title); font-size:3em; font-weight:700; color:var(--accent-orange);
+      margin-bottom:20px; line-height:1.1; text-align:center;
     }
     .portal-img{
-      max-width:280px;
-      width:80%;
-      height:auto;
-      margin:15px auto;
-      display:block;
+      max-width:280px; width:80%; height:auto; margin:15px auto; display:block;
       filter:drop-shadow(0 0 20px rgba(255,140,0,.6));
     }
+    .neon-flicker { font-weight:700; color:var(--accent-purple); animation:flicker-purple 1.5s infinite alternate; }
 
-    /* Tarjeta con doble imagen de fondo + filtro sombrío */
+    /* ====== Escenario CENTRADO y ESCALABLE ====== */
+    .card-stage{
+      position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%); /* centrado perfecto */
+    }
+    .card-frame{
+      width: var(--base-w);
+      height: var(--base-h);
+      padding: calc(var(--pad-y)/2) calc(var(--pad-x)/2); /* aire interior para el glow */
+      transform-origin:center center;
+      will-change: transform; /* se escala aquí */
+    }
+
+    /* === TU TARJETA === */
     .invitation-card{
-      width:90%; max-width:380px; min-height:600px;
+      width:100%; height:100%;
       background:
         linear-gradient(145deg, rgba(0,0,0,0.70), rgba(0,0,0,0.70)),
         url('woodyterr.webp'),
@@ -58,21 +88,16 @@
       position:relative;
       z-index:50;
       opacity:0;
-      transform:scale(.8) rotateY(-15deg);
+      transform: rotateY(-15deg);         /* tu efecto 3D intacto */
       transition:opacity 1s ease-out, transform 1s ease-out;
     }
-
-    .neon-flicker {
-      font-weight:700;
-      color:var(--accent-purple);
-      animation:flicker-purple 1.5s infinite alternate;
-    }
+    .show-card{ opacity:1 !important; transform: rotateY(0deg) !important; }
 
     h1{
       font-family:var(--font-title); font-size:3.5em; color:var(--accent-orange);
-      margin-bottom:15px; line-height:1.1; transform:scale(.9); animation:title-pop .8s ease-out forwards; font-weight:900;
+      margin:0 0 15px; line-height:1.1; transform:scale(.9);
+      animation:title-pop .8s ease-out forwards; font-weight:900;
     }
-    @keyframes title-pop{0%{opacity:0;transform:scale(.5)}100%{opacity:1;transform:scale(1)}}
     h2{ font-size:1.2em; font-weight:700; color:var(--accent-purple); margin:10px 0 25px; text-transform:uppercase; letter-spacing:2px; }
     p{ font-size:1em; margin:15px 0; line-height:1.5; color:var(--text-color); }
 
@@ -86,30 +111,25 @@
     .data-panel span{ font-weight:900; color:var(--accent-orange); text-shadow:0 0 5px rgba(255,140,0,.5); }
 
     .location-button{
-      display:block;
-      margin:30px auto;
-      padding:18px 30px;
-      background:var(--accent-orange);
-      color:#fff;
-      text-decoration:none;
-      font-weight:900;
-      border-radius:50px;
-      text-transform:uppercase;
-      letter-spacing:1px;
-      transition:all .3s ease;
-      position:relative;
-      overflow:hidden;
-      border:none;
-      animation:button-flicker 1.5s infinite alternate;
+      display:block; margin:30px auto; padding:18px 30px;
+      background:var(--accent-orange); color:#fff; text-decoration:none; font-weight:900;
+      border-radius:50px; text-transform:uppercase; letter-spacing:1px; transition:all .3s ease;
+      position:relative; overflow:hidden; border:none; animation:button-flicker 1.5s infinite alternate;
     }
     .location-button:hover{ background:var(--accent-orange); color:#fff; box-shadow:0 0 25px var(--accent-orange); transform:scale(1.05); }
 
+    /* === Tus efectos flotantes === */
     .effect-item{
       position:absolute; font-size:3em; opacity:.5; pointer-events:none; animation:float-and-sway 15s linear infinite;
       filter:drop-shadow(0 0 5px rgba(255,255,255,.5)); z-index:9999;
     }
     .effect-item:nth-child(1){ bottom:38%; left:26%; animation-duration:7s; color:var(--accent-orange); }
+    .effect-item img{ width:1.8em; height:1.8em; display:block; object-fit:contain; pointer-events:none; }
+    .effect-item:nth-of-type(1) img { transform: rotate(10deg); }
+    .effect-item:nth-of-type(4) img { transform: rotate(15deg); }
 
+    /* Animaciones (todas las tuyas) */
+    @keyframes title-pop{0%{opacity:0;transform:scale(.5)}100%{opacity:1;transform:scale(1)}}
     @keyframes float-and-sway{
       0%{transform:translate(0,0) rotate(0deg); opacity:0}
       20%{opacity:.7}
@@ -117,7 +137,6 @@
       80%{opacity:.7}
       100%{transform:translate(0,0) rotate(0deg); opacity:0}
     }
-
     @keyframes flicker-purple {
       0%,18%,22%,25%,53%,57%,100% {
         opacity:1;
@@ -126,12 +145,8 @@
           0 0 16px rgba(157,60,255,0.7),
           0 0 28px rgba(157,60,255,0.5);
       }
-      20%,24%,55% {
-        opacity:.6;
-        text-shadow:none;
-      }
+      20%,24%,55% { opacity:.6; text-shadow:none; }
     }
-
     @keyframes button-flicker {
       0%, 18%, 22%, 25%, 53%, 57%, 100% {
         box-shadow:
@@ -140,59 +155,47 @@
           0 0 28px rgba(255,140,0,0.5);
         background: var(--accent-orange);
       }
-      20%, 24%, 55% {
-        box-shadow: none;
-        background: rgba(255,140,0,0.6);
-      }
+      20%, 24%, 55% { box-shadow: none; background: rgba(255,140,0,0.6); }
     }
-
-    .show-card{ opacity:1 !important; transform:scale(1) rotateY(0deg) !important; }
-
-    /* Tamaño de las PNG dentro de los spans de efecto */
-    .effect-item img{
-      width: 1.8em;
-      height: 1.8em;
-      display: block;
-      object-fit: contain;
-      pointer-events: none;
-    }
-    .effect-item:nth-of-type(1) img { transform: rotate(10deg); }
-    .effect-item:nth-of-type(4) img { transform: rotate(15deg); }
   </style>
 </head>
 <body>
+  <!-- Pantalla de bienvenida -->
   <div id="welcome-screen">
     <h1 class="portal-text">HUGO TURNS 4!</h1>
     <img src="happyhw1.webp" alt="Happy Halloween" class="portal-img">
     <p class="small-instruction neon-flicker" style="margin-top:50px;">Toca la pantalla...</p>
   </div>
 
-  <!-- Tarjeta -->
-  <div class="invitation-card" id="invitation-card-content">
-    <span class="effect-item"><img src="iconpic1.webp" alt=""></span>
+  <!-- Escenario centrado y escalable -->
+  <div class="card-stage">
+    <div class="card-frame" id="card-frame">
+      <!-- TU tarjeta intacta -->
+      <div class="invitation-card" id="invitation-card-content">
+        <span class="effect-item"><img src="iconpic1.webp" alt=""></span>
 
-    <h1 class="portal-text">HUGO TURNS 4!</h1>
-    <h2>Happy Halloween Birthday</h2>
-    <p>¡Acompáñanos a celebrar el cumple número 4 de Hugo, te esperamos!</p>
+        <h1 class="portal-text">HUGO TURNS 4!</h1>
+        <h2>Happy Halloween Birthday</h2>
+        <p>¡Acompáñanos a celebrar el cumple número 4 de Hugo, te esperamos!</p>
 
-    <div class="data-panel">
-      <p>FECHA: <span>🎃 30 DE OCTUBRE</span></p>
-      <p>HORA: <span>🕰️ 04:00 PM</span></p>
-      <p>NOTA: <span>👻 Trae tu Disfraz</span></p>
-      <p>LUGAR: <span>🗺️ Privada Los Reyes,<br>Portal de Hierro</span></p>
+        <div class="data-panel">
+          <p>FECHA: <span>🎃 30 DE OCTUBRE</span></p>
+          <p>HORA:  <span>🕰️ 04:00 PM</span></p>
+          <p>NOTA:  <span>👻 Trae tu Disfraz</span></p>
+          <p>LUGAR: <span>🗺️ Privada Los Reyes,<br>Portal de Hierro</span></p>
+        </div>
+
+        <a id="map-link" href="#" class="location-button" target="_blank">UBICACIÓN</a>
+        <p style="font-size:.9em; color:var(--accent-purple);">Buuu!</p>
+      </div>
     </div>
-
-    <a id="map-link" href="#" class="location-button" target="_blank">UBICACIÓN</a>
-    <p style="font-size:.9em; color:var(--accent-purple);">Buuu!</p>
   </div>
 
-  <!-- AUDIO de fondo desde archivo local -->
+  <!-- Música (solo HalloweenWaltzz, sin buzz) -->
   <audio id="bgm" src="HalloweenWaltzz.mp3" preload="auto" loop></audio>
 
   <script>
-    /* =========================
-       MAPA
-       ========================= */
+    /* ====== MAPA (igual que tu lógica) ====== */
     const LATITUD = 25.757046;
     const LONGITUD = -109.023735;
     const LUGAR_FIESTA = "Fiesta de Hugo";
@@ -204,181 +207,80 @@
     }
     document.getElementById('map-link').href = createMapLink(LATITUD, LONGITUD, LUGAR_FIESTA);
 
-    /* =========================
-       AUDIO DE FONDO (MP3)
-       ========================= */
+    /* ====== AUDIO (desde 10s con fade-in) ====== */
     const welcomeScreen = document.getElementById('welcome-screen');
     const invitationCardContent = document.getElementById('invitation-card-content');
     const bgm = document.getElementById('bgm');
 
-    // Volumen inicial moderado + fade-in
     function fadeInAudio(target = 0.85, ms = 800){
-      try {
-        const steps = 16, stepTime = ms/steps;
-        let v = 0;
-        bgm.volume = 0;
-        const id = setInterval(()=>{
-          v += target/steps;
-          bgm.volume = Math.min(v, target);
-          if (v >= target) clearInterval(id);
-        }, stepTime);
+      try { const steps = 16, stepTime = ms/steps; let v = 0; bgm.volume = 0;
+        const id = setInterval(()=>{ v += target/steps; bgm.volume = Math.min(v, target); if (v >= target) clearInterval(id); }, stepTime);
       } catch(e){}
     }
-
-    // Reproducción desde el segundo 10 (una sola vez)
     let musicStarted = false;
     async function startMusicFrom10s(){
       try{
-        // Si ya hay metadata, podemos fijar currentTime; si no, esperamos al evento.
-        const seekAndPlay = async () => {
-          try { bgm.currentTime = 10; } catch(e) {}
-          await bgm.play();
-          fadeInAudio(0.85, 900);
-          musicStarted = true;
-        };
-        if (bgm.readyState >= 1){ // HAVE_METADATA
-          await seekAndPlay();
-        } else {
-          const onMeta = async () => {
-            bgm.removeEventListener('loadedmetadata', onMeta);
-            await seekAndPlay();
-          };
-          bgm.addEventListener('loadedmetadata', onMeta);
-          // Por si algunos navegadores disparan canplay primero
-          const onCanPlay = async () => {
-            bgm.removeEventListener('canplay', onCanPlay);
-            if (!musicStarted) await seekAndPlay();
-          };
-          bgm.addEventListener('canplay', onCanPlay);
+        const seekAndPlay = async () => { try { bgm.currentTime = 10; } catch(e) {} await bgm.play(); fadeInAudio(0.85, 900); musicStarted = true; };
+        if (bgm.readyState >= 1){ await seekAndPlay(); }
+        else{
+          bgm.addEventListener('loadedmetadata', async function onMeta(){ bgm.removeEventListener('loadedmetadata', onMeta); await seekAndPlay(); });
+          bgm.addEventListener('canplay', async function onCan(){ bgm.removeEventListener('canplay', onCan); if (!musicStarted) await seekAndPlay(); });
         }
-      }catch(err){
-        // Si fallara, el usuario ya hizo tap, así que un segundo intento suele funcionar
-        try { await bgm.play(); } catch(e){}
-      }
+      }catch(err){ try { await bgm.play(); } catch(e){} }
     }
 
-    /* =========================
-       BUZZ eléctrico sincronizado al parpadeo
-       ========================= */
-    const FLICKER_PERIOD = 1.5; // Debe coincidir con la animación CSS
-    let ctx, buzzGain, sizzleGain, humOscs = [], buzzTimer = null;
+    /* ====== AUTO-SCALE sin medir DOM ====== */
+    const frame = document.getElementById('card-frame');
 
-    function initBuzz(){
-      if (ctx) return;
-      ctx = new (window.AudioContext || window.webkitAudioContext)();
+    function cssNum(v){ return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(v)); }
+    function viewport(){
+      const vv = window.visualViewport;
+      const vw = Math.min(window.innerWidth, document.documentElement.clientWidth || window.innerWidth);
+      const vh = vv ? vv.height : Math.min(window.innerHeight, document.documentElement.clientHeight || window.innerHeight);
+      return { vw, vh };
+    }
+    function fitCard(){
+      const baseW = cssNum('--base-w');
+      const baseH = cssNum('--base-h');
+      const padX  = cssNum('--pad-x');
+      const padY  = cssNum('--pad-y');
 
-      // Mezcla principal del buzz
-      buzzGain = ctx.createGain();
-      buzzGain.gain.value = 0.0; // se controla con scheduleBuzzCycle
-      buzzGain.connect(ctx.destination);
+      const targetW = baseW + padX;
+      const targetH = baseH + padY;
 
-      // HUM (60 Hz + armónicos) con leve distorsión y filtro
-      const humMix = ctx.createGain(); humMix.gain.value = 0.5;
+      frame.style.width  = baseW + 'px';
+      frame.style.height = baseH + 'px';
+      frame.style.transform = 'scale(1)';
 
-      const MAINS = 60; // cambia a 50 si lo prefieres
-      const partials = [1,2,3,4,5,6];
-      partials.forEach((n, i) => {
-        const osc = ctx.createOscillator();
-        osc.type = (i % 2 === 0) ? 'sawtooth' : 'square';
-        const pre = ctx.createGain();
-        pre.gain.value = 0.08 / (i + 1);
-        osc.frequency.value = MAINS * n;
-        osc.detune.value = (i === 0 ? 2 : (Math.random() * 4 - 2));
-        osc.connect(pre).connect(humMix);
-        osc.start();
-        humOscs.push(osc);
-      });
+      const { vw, vh } = viewport();
+      const outer = 2 * (parseFloat(getComputedStyle(document.body).getPropertyValue('padding-left')) || 20);
+      const availW = vw - outer;
+      const availH = vh - outer;
 
-      const shaper = ctx.createWaveShaper();
-      const curve = new Float32Array(256);
-      for (let i = 0; i < curve.length; i++){
-        const x = (i / (curve.length - 1)) * 2 - 1;
-        curve[i] = Math.tanh(2.2 * x);
-      }
-      shaper.curve = curve;
-      shaper.oversample = '4x';
-
-      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 800;
-
-      humMix.connect(shaper).connect(lp).connect(buzzGain);
-
-      // SIZZLE (ruido banda alta) sutil para el “crackle”
-      const dur = 1.5;
-      const buffer = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < data.length; i++){ data[i] = (Math.random() * 2 - 1); }
-      const noise = ctx.createBufferSource();
-      noise.buffer = buffer; noise.loop = true;
-
-      const hp = ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value = 1500;
-      const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value = 2800; bp.Q.value = 1.2;
-
-      sizzleGain = ctx.createGain(); sizzleGain.gain.value = 0.018;
-
-      noise.connect(hp).connect(bp).connect(sizzleGain).connect(buzzGain);
-      noise.start();
+      const scale = Math.min(availW/targetW, availH/targetH, 1);
+      frame.style.transform = `translateZ(0) scale(${scale})`;
     }
 
-    function scheduleBuzzCycle(t0){
-      if (!buzzGain) return;
-      // mismos hitos que la animación del botón
-      const onMarks  = [0, 0.18, 0.22, 0.25, 0.53, 0.57, 1.00];
-      const offMarks = [0.20, 0.24, 0.55];
+    window.addEventListener('resize', fitCard);
+    window.visualViewport && window.visualViewport.addEventListener('resize', fitCard);
+    window.addEventListener('orientationchange', fitCard);
+    window.addEventListener('load', fitCard);
 
-      const ON  = 0.65;
-      const OFF = 0.0;
-
-      onMarks.forEach(p  => buzzGain.gain.setValueAtTime(ON,  t0 + p * FLICKER_PERIOD));
-      offMarks.forEach(p => buzzGain.gain.setValueAtTime(OFF, t0 + p * FLICKER_PERIOD));
-      buzzGain.gain.setTargetAtTime(OFF, t0 + FLICKER_PERIOD, 0.01);
-
-      // chispazo breve al encender
-      if (sizzleGain){
-        const base = 0.018, snap = 0.11;
-        onMarks.forEach(p => {
-          const tp = t0 + p * FLICKER_PERIOD;
-          sizzleGain.gain.setValueAtTime(snap, tp);
-          sizzleGain.gain.setTargetAtTime(base, tp + 0.03, 0.01);
-        });
-      }
-    }
-
-    function startBuzzSync(){
-      if (!ctx) return;
-      if (!buzzTimer){
-        const t0 = ctx.currentTime + 0.05;
-        scheduleBuzzCycle(t0);
-        buzzTimer = setInterval(()=>scheduleBuzzCycle(ctx.currentTime), FLICKER_PERIOD * 1000);
-      }
-    }
-    function stopBuzzSync(){
-      if (buzzTimer){ clearInterval(buzzTimer); buzzTimer = null; }
-      if (buzzGain){ buzzGain.gain.setTargetAtTime(0.0, ctx?.currentTime ?? 0, 0.03); }
-    }
-
-    // Inicio tras el toque de bienvenida (cumple autoplay)
+    /* Inicio tras tap (autoplay friendly) */
     welcomeScreen.addEventListener('click', async ()=>{
       welcomeScreen.style.opacity = '0';
       invitationCardContent.classList.add('show-card');
       setTimeout(()=>welcomeScreen.style.display='none', 500);
 
-      // Música (desde 10s)
       await startMusicFrom10s();
-
-      // Buzz
-      if (!ctx) initBuzz();
-      try { await ctx.resume(); } catch(e) {}
-      startBuzzSync();
+      setTimeout(fitCard, 50);
     }, { passive:true });
 
-    // Manejo de visibilidad: reanudar al volver (ya hubo gesto del usuario)
+    /* Al volver a la pestaña */
     document.addEventListener('visibilitychange', async ()=>{
-      if (document.hidden){
-        try { if (!bgm.paused) bgm.pause(); } catch(e){}
-        stopBuzzSync();
-      } else {
+      if (!document.hidden){
         try { await bgm.play(); } catch(e){}
-        if (ctx) { try { ctx.resume(); } catch(e){} startBuzzSync(); }
+        fitCard();
       }
     });
   </script>
